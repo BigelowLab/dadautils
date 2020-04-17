@@ -8,6 +8,7 @@ filter_and_trim(
   filelist,
   output_path = file.path(dirname(filelist$forward[1]), "filterAndTrim"),
   save_results = FALSE,
+  compress = TRUE,
   ...
 )
 }
@@ -17,6 +18,8 @@ filter_and_trim(
 \item{output_path}{character, the output path}
 
 \item{save_results}{logical, save CSV if TRUE}
+
+\item{compress}{logical, see \code{\link[dada2]{filterAndTrim}}}
 
 \item{...}{other arguments for \code{\link[dada2]{filterAndTrim}}}
 }

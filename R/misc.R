@@ -1,3 +1,4 @@
+
 #' Provide an R session audit
 #'
 #' @export
@@ -188,6 +189,33 @@ strip_extension <- function(
   
   }
 
+
+#' Add an extension to a filename
+#'
+#' @export
+#' @param filename character, vector of one or more filenames
+#' @param ext character, the extension to add
+#' @param no_dup logical if TRUE then check first to determine if the filenames already
+#'        have the extension, if they do have it do not add it again
+#' @return the input filenames, possibly with the spcified extension added
+add_extension <- function(
+	filename = c("BR2_2016_S216_L001_R2_001.fastq", "foobar.fastq.gz", "fuzzbaz.txt"),
+  ext = ".gz",
+  no_dup = TRUE){
+  
+  
+  if (no_dup){
+  	pat <- paste0("^.*\\", ext[1], "$")
+  	ix <- grepl(pat, filename)
+  	filename[!ix] <- paste0(filename[!ix], ext[1])
+  } else {
+  	filename <- paste0(filename, ext[1])
+  }
+  
+  filename
+}
+
+  
 #' List fastq files and separate into forward and reverse reads
 #' 
 #' @export

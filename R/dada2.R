@@ -3,32 +3,34 @@
 #' @export
 #' @param filelist list of forward and reverse fastq files
 #' @param output_path character, the output path
+#' @param compress logical, see \code{\link[dada2]{filterAndTrim}}
 #' @param ... other arguments for \code{\link[dada2]{filterAndTrim}}
 #' @param save_results logical, save CSV if TRUE
 #' @return integer matrix as tibble see \code{\link[dada2]{filterAndTrim}}
 filter_and_trim <- function(filelist, 
                             output_path = file.path(dirname(filelist$forward[1]),'filterAndTrim'),
                             save_results = FALSE,
+                            compress = TRUE,
                             ...){
   
   ffilt <- file.path(output_path, basename(filelist$forward))
   rfilt <- file.path(output_path, basename(filelist$reverse))
-  dots <- list(...)
-  if (("compress" %in% names(dots)) && dots$compress){
-  	ffilt <- paste0(ffilt, ".gz")
-  	rfilt <- paste0(rfilt, ".gz")
+  
+  if (compress){
+  	ffilt <- add_extension(ffilt, ext = ".gz", no_dup = TRUE)
+  	rfilt <- add_extension(rfilt, ext = ".gz", no_dup = TRUE)
   }
   
   x <- dada2::filterAndTrim(filelist$forward, 
                             ffilt, 
                             rev = filelist$reverse, 
                             filt.rev = rfilt,
+                            compress = compress,
                             ...)
 
   x <- dplyr::as_tibble(x, rownames = "name")
   if (save_results) {
-    x <-  x %>%
-    readr::write_csv(file.path(output_path, "filter_and_trim-results.csv"))
+    x <- readr::write_csv(x, file.path(output_path, "filter_and_trim-results.csv"))
   }   
   x
 }
