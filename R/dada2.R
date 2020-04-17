@@ -13,6 +13,12 @@ filter_and_trim <- function(filelist,
   
   ffilt <- file.path(output_path, basename(filelist$forward))
   rfilt <- file.path(output_path, basename(filelist$reverse))
+  dots <- list(...)
+  if (("compress" %in% names(dots)) && dots$compress){
+  	ffilt <- paste0(ffilt, ".gz")
+  	rfilt <- paste0(rfilt, ".gz")
+  }
+  
   x <- dada2::filterAndTrim(filelist$forward, 
                             ffilt, 
                             rev = filelist$reverse, 
