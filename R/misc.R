@@ -32,12 +32,19 @@ audit <- function(filename = "", pbs_jobid = "not known"){
 
 #' Count the number of CPUs
 #'
-#' THis is a wrapper around \code{\link[parallel]{detectCores}}
+#' If the number of CPUS has been specified for a PBS session then retrieves the values 
+#' of environment variable '$NCPUS' otherwise this is wrap of \code{\link[parallel]{detectCores}}
 #'
 #' @export
 #' @return integer count of cores
 count_cores <- function(){
-  parallel::detectCores()
+  ncpus <- Sys.getenv("NCPUS")
+  if (nchar(ncpus) == 0){
+   ncpus <- parallel::detectCores()
+	} else {
+		ncpus <- as.integer(ncpus[1])
+	}
+	ncpus
 }
 
 #' Given a path - make it if it doesn't exist

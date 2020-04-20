@@ -10,5 +10,6 @@ count_cores()
 integer count of cores
 }
 \description{
-THis is a wrapper around \code{\link[parallel]{detectCores}}
+If the number of CPUS has been specified for a PBS session then retrieves the values 
+of environment variable '$NCPUS' otherwise this is wrap of \code{\link[parallel]{detectCores}}
 }
