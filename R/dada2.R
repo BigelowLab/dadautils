@@ -4,6 +4,7 @@
 #' @param filelist list of forward and reverse fastq files
 #' @param output_path character, the output path
 #' @param compress logical, see \code{\link[dada2]{filterAndTrim}}
+#' @param multithread numeric, the number of cores to use. Defaults to \code{\link{count_cores}}
 #' @param ... other arguments for \code{\link[dada2]{filterAndTrim}}
 #' @param save_results logical, save CSV if TRUE
 #' @return integer matrix as tibble see \code{\link[dada2]{filterAndTrim}}
@@ -11,6 +12,7 @@ filter_and_trim <- function(filelist,
                             output_path = file.path(dirname(filelist$forward[1]),'filterAndTrim'),
                             save_results = FALSE,
                             compress = TRUE,
+                            multithread = count_cores(),
                             ...){
   
   ffilt <- file.path(output_path, basename(filelist$forward))
@@ -26,6 +28,7 @@ filter_and_trim <- function(filelist,
                             rev = filelist$reverse, 
                             filt.rev = rfilt,
                             compress = compress,
+                            multithread = multithread, 
                             ...)
 
   x <- dplyr::as_tibble(x, rownames = "name")
@@ -40,18 +43,21 @@ filter_and_trim <- function(filelist,
 #'
 #' @export
 #' @param filelist list of forward and reverse fastq files
+#' @param multithread numeric, the number of cores to use. Defaults to \code{\link{count_cores}}
 #' @param ... arguments for \code{\link[dada2]{learnErrors}}
 #' @param output_path character, the output path
 #' @param save_output logical, if TRUE save the output to the specified output_path
 #' @param save_graphics logical, if TRUE try to capture quality plots form the resulting cut_files
-learn_errors <- function(filelist, ...,
+learn_errors <- function(filelist, 
+	multithread = count_cores(),
   output_path = dirname(filelist$forward[1]),
   save_output = FALSE, 
-  save_graphics = FALSE){
+  save_graphics = FALSE,
+  ...){
 
   errs <- list(
-      forward =  dada2::learnErrors(filelist$forward, ...),
-      reverse =  dada2::learnErrors(filelist$reverse, ...)
+      forward =  dada2::learnErrors(filelist$forward, multithread = multithread, ...),
+      reverse =  dada2::learnErrors(filelist$reverse, multithread = multithread, ...)
     )
 
   if (save_output){
@@ -80,16 +86,19 @@ learn_errors <- function(filelist, ...,
 #' @export
 #' @param filelist list of forward and reverse fastq files
 #' @param errs list of forward and reverse outputs of learnErrors
+#' @param multithread numeric, the number of cores to use. Defaults to \code{\link{count_cores}}
 #' @param ... arguments for \code{\link[dada2]{dada}}
 #' @return list with elements for forward and reverse as returned by \code{\link[dada2]{dada}}
-run_dada <- function(filelist, errs, ...){
+run_dada <- function(filelist, errs, 
+	multithread = count_cores(),
+	...){
   
 
   filelist <- lapply(filelist, dada2::derepFastq)
 
   x <- list(
-    forward = dada2::dada(filelist$forward, errs$forward, ...),
-    reverse = dada2::dada(filelist$reverse, errs$reverse, ...)
+    forward = dada2::dada(filelist$forward, errs$forward, multithread = multithread, ...),
+    reverse = dada2::dada(filelist$reverse, errs$reverse, multithread = multithread, ...)
   )
   x
 }

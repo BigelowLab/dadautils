@@ -9,6 +9,7 @@ filter_and_trim(
   output_path = file.path(dirname(filelist$forward[1]), "filterAndTrim"),
   save_results = FALSE,
   compress = TRUE,
+  multithread = count_cores(),
   ...
 )
 }
@@ -20,6 +21,8 @@ filter_and_trim(
 \item{save_results}{logical, save CSV if TRUE}
 
 \item{compress}{logical, see \code{\link[dada2]{filterAndTrim}}}
+
+\item{multithread}{numeric, the number of cores to use. Defaults to \code{\link{count_cores}}}
 
 \item{...}{other arguments for \code{\link[dada2]{filterAndTrim}}}
 }

@@ -6,22 +6,25 @@
 \usage{
 learn_errors(
   filelist,
-  ...,
+  multithread = count_cores(),
   output_path = dirname(filelist$forward[1]),
   save_output = FALSE,
-  save_graphics = FALSE
+  save_graphics = FALSE,
+  ...
 )
 }
 \arguments{
 \item{filelist}{list of forward and reverse fastq files}
 
-\item{...}{arguments for \code{\link[dada2]{learnErrors}}}
+\item{multithread}{numeric, the number of cores to use. Defaults to \code{\link{count_cores}}}
 
 \item{output_path}{character, the output path}
 
 \item{save_output}{logical, if TRUE save the output to the specified output_path}
 
 \item{save_graphics}{logical, if TRUE try to capture quality plots form the resulting cut_files}
+
+\item{...}{arguments for \code{\link[dada2]{learnErrors}}}
 }
 \description{
 Run dada2::learnErrors on a set of fastq files

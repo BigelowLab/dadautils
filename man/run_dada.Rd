@@ -4,12 +4,14 @@
 \alias{run_dada}
 \title{Run dada}
 \usage{
-run_dada(filelist, errs, ...)
+run_dada(filelist, errs, multithread = count_cores(), ...)
 }
 \arguments{
 \item{filelist}{list of forward and reverse fastq files}
 
 \item{errs}{list of forward and reverse outputs of learnErrors}
+
+\item{multithread}{numeric, the number of cores to use. Defaults to \code{\link{count_cores}}}
 
 \item{...}{arguments for \code{\link[dada2]{dada}}}
 }
