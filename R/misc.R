@@ -75,7 +75,7 @@ list(version = "v0.000",
      input_path = "/home/btupper/edna/data/examples/ben_demo_raw", 
      output_path = "/home/btupper/edna/data/examples/ben_demo_raw_results", 
      verbose = "info", 
-     multithread = 24L, 
+     multithread = "auto", 
      dada2_plotQualityProfiles = list(
         `FALSE` = 2L), 
      dada2_filterAndTrim_filtN = list(
@@ -148,12 +148,15 @@ check_configuration <- function(
 #' 
 #' @export
 #' @param x configuration filename
-#' @param default list describing the default
+#' @param default list describing the default configuration
 #' @param check logical, if TRUE check the config against the default
+#' @param autodetect_cores logical, if TRUE and multithread is present (and "auto")
+#'    then autoset the number of cores.
 #' @return list config values or a try-error
 get_configuration <- function(x ,
   default = default_configuration(),
-  check = FALSE){
+  check = FALSE,
+  autodetect_cores = TRUE){
   
   if (length(x) == 0) {
     cfg <- default
@@ -163,8 +166,11 @@ get_configuration <- function(x ,
       print(cfg)
       stop("failed to read config file:", x[1])
     }
-    # TODO
+    # TODO - what do we really want here?
     if (check) cfg <- check_configuration(cfg, default)
+  }
+  if ("multithread" %in% names(cfg) && autodetect_cores){
+    	if (cfg$multithread[1] == 'auto') cfg$multithread <- count_cores()
   }
   cfg
 }
@@ -192,9 +198,7 @@ strip_extension <- function(
       }
       s
     })
-  
-  
-  }
+}
 
 
 #' Add an extension to a filename

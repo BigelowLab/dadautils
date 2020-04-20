@@ -4,14 +4,22 @@
 \alias{get_configuration}
 \title{Get the configuration use default if needed}
 \usage{
-get_configuration(x, default = default_configuration(), check = FALSE)
+get_configuration(
+  x,
+  default = default_configuration(),
+  check = FALSE,
+  autodetect_cores = TRUE
+)
 }
 \arguments{
 \item{x}{configuration filename}
 
-\item{default}{list describing the default}
+\item{default}{list describing the default configuration}
 
 \item{check}{logical, if TRUE check the config against the default}
+
+\item{autodetect_cores}{logical, if TRUE and multithread is present (and "auto")
+then autoset the number of cores.}
 }
 \value{
 list config values or a try-error
