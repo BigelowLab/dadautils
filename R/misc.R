@@ -8,6 +8,7 @@
 audit <- function(filename = "", pbs_jobid = "not known"){
 	cat("Audit date:", format(Sys.time(), "%Y-%m-%d %H:%M:%S", usetz = TRUE), "\n",
 		file = filename)
+	cat("System PID:", Sys.getpid(), "\n", file = filename, append = TRUE)
 	cat("PBS_JOBID:", pbs_jobid, "\n", file = filename, append = TRUE)
 	cat("Cores:", count_cores(), "\n", file = filename, append = TRUE)
 	cat("R version:", R.version.string, "\n",
