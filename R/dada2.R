@@ -19,8 +19,8 @@ filter_and_trim <- function(filelist,
   rfilt <- file.path(output_path, basename(filelist$reverse))
   
   if (compress){
-  	ffilt <- add_extension(ffilt, ext = ".gz", no_dup = TRUE)
-  	rfilt <- add_extension(rfilt, ext = ".gz", no_dup = TRUE)
+    ffilt <- add_extension(ffilt, ext = ".gz", no_dup = TRUE)
+    rfilt <- add_extension(rfilt, ext = ".gz", no_dup = TRUE)
   }
   
   x <- dada2::filterAndTrim(filelist$forward, 
@@ -49,7 +49,7 @@ filter_and_trim <- function(filelist,
 #' @param save_output logical, if TRUE save the output to the specified output_path
 #' @param save_graphics logical, if TRUE try to capture quality plots form the resulting cut_files
 learn_errors <- function(filelist, 
-	multithread = count_cores(),
+  multithread = count_cores(),
   output_path = dirname(filelist$forward[1]),
   save_output = FALSE, 
   save_graphics = FALSE,
@@ -90,8 +90,8 @@ learn_errors <- function(filelist,
 #' @param ... arguments for \code{\link[dada2]{dada}}
 #' @return list with elements for forward and reverse as returned by \code{\link[dada2]{dada}}
 run_dada <- function(filelist, errs, 
-	multithread = count_cores(),
-	...){
+  multithread = count_cores(),
+  ...){
   
 
   filelist <- lapply(filelist, dada2::derepFastq)
@@ -142,11 +142,11 @@ count_uniques <- function(x, ...){
 #' @param ofile character, the name of the PDF file to generate of NA
 #' @param ... further arguments for \code{\link[dada2]{plotQualityProfile}}
 plot_qualityProfile <- function(x, 
-	ofile = c(NA, "qualityProfile.pdf")[1],
-	...){
-	if (!is.na(ofile)) grDevices::pdf(ofile)
-	ok <- dada2::plotQualityProfile(x, ...)
-	if (!is.na(ofile)) grDevices::dev.off()
-	ok
+  ofile = c(NA, "qualityProfile.pdf")[1],
+  ...){
+  if (!is.na(ofile)) grDevices::pdf(ofile)
+  ok <- dada2::plotQualityProfile(x, ...)
+  if (!is.na(ofile)) grDevices::dev.off()
+  ok
 }
 

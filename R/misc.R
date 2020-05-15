@@ -6,29 +6,29 @@
 #' @param pbs_jobid character, the OPBS jobid if known
 #' @return NULL invisibly
 audit <- function(filename = "", pbs_jobid = "not known"){
-	cat("Audit date:", format(Sys.time(), "%Y-%m-%d %H:%M:%S", usetz = TRUE), "\n",
-		file = filename)
-	cat("System PID:", Sys.getpid(), "\n", file = filename, append = TRUE)
-	cat("PBS_JOBID:", pbs_jobid, "\n", file = filename, append = TRUE)
-	cat("Cores:", count_cores(), "\n", file = filename, append = TRUE)
-	cat("R version:", R.version.string, "\n",
-		file = filename, append = TRUE)
-	cat("libPaths():\n",
-		file = filename, append = TRUE)
-	for (lp in .libPaths()) cat("    ", lp, "\n",
-															file = filename, append = TRUE)
-	x <- as.data.frame(utils::installed.packages(), stringsAsFactors = FALSE)
-	x <- x[,c("Package", "Version",  "LibPath")]
-	cat("installed.packages():\n",
-			file = filename, append = TRUE)
-	if (nzchar(filename)){
-		conn <- file(filename, open = 'at')
-		utils::write.csv(x, file = conn, row.names = FALSE)
-		close(conn)
-	} else {
-		print(x, row.names = FALSE)
-	}
-	invisible(NULL)
+  cat("Audit date:", format(Sys.time(), "%Y-%m-%d %H:%M:%S", usetz = TRUE), "\n",
+    file = filename)
+  cat("System PID:", Sys.getpid(), "\n", file = filename, append = TRUE)
+  cat("PBS_JOBID:", pbs_jobid, "\n", file = filename, append = TRUE)
+  cat("Cores:", count_cores(), "\n", file = filename, append = TRUE)
+  cat("R version:", R.version.string, "\n",
+    file = filename, append = TRUE)
+  cat("libPaths():\n",
+    file = filename, append = TRUE)
+  for (lp in .libPaths()) cat("    ", lp, "\n",
+                              file = filename, append = TRUE)
+  x <- as.data.frame(utils::installed.packages(), stringsAsFactors = FALSE)
+  x <- x[,c("Package", "Version",  "LibPath")]
+  cat("installed.packages():\n",
+      file = filename, append = TRUE)
+  if (nzchar(filename)){
+    conn <- file(filename, open = 'at')
+    utils::write.csv(x, file = conn, row.names = FALSE)
+    close(conn)
+  } else {
+    print(x, row.names = FALSE)
+  }
+  invisible(NULL)
 }
 
 #' Count the number of CPUs
@@ -42,10 +42,10 @@ count_cores <- function(){
   ncpus <- Sys.getenv("NCPUS")
   if (nchar(ncpus) == 0){
    ncpus <- parallel::detectCores()
-	} else {
-		ncpus <- as.integer(ncpus[1])
-	}
-	ncpus
+  } else {
+    ncpus <- as.integer(ncpus[1])
+  }
+  ncpus
 }
 
 #' Given a path - make it if it doesn't exist
@@ -97,7 +97,7 @@ list(version = "v0.000",
         rm.phix = TRUE, 
         compress = FALSE), 
     dada2_dada_filtered = list(
-    	name = "dada"), 
+      name = "dada"), 
     dada2_removeBimeraDenovo_seqtab = list(
         method = "consensus", 
         verbose = TRUE), 
@@ -171,7 +171,7 @@ get_configuration <- function(x ,
     if (check) cfg <- check_configuration(cfg, default)
   }
   if ("multithread" %in% names(cfg) && autodetect_cores){
-    	if (cfg$multithread[1] == 'auto') cfg$multithread <- count_cores()
+      if (cfg$multithread[1] == 'auto') cfg$multithread <- count_cores()
   }
   cfg
 }
@@ -211,17 +211,17 @@ strip_extension <- function(
 #'        have the extension, if they do have it do not add it again
 #' @return the input filenames, possibly with the spcified extension added
 add_extension <- function(
-	filename = c("BR2_2016_S216_L001_R2_001.fastq", "foobar.fastq.gz", "fuzzbaz.txt"),
+  filename = c("BR2_2016_S216_L001_R2_001.fastq", "foobar.fastq.gz", "fuzzbaz.txt"),
   ext = ".gz",
   no_dup = TRUE){
   
   
   if (no_dup){
-  	pat <- paste0("^.*\\", ext[1], "$")
-  	ix <- grepl(pat, filename)
-  	filename[!ix] <- paste0(filename[!ix], ext[1])
+    pat <- paste0("^.*\\", ext[1], "$")
+    ix <- grepl(pat, filename)
+    filename[!ix] <- paste0(filename[!ix], ext[1])
   } else {
-  	filename <- paste0(filename, ext[1])
+    filename <- paste0(filename, ext[1])
   }
   
   filename
