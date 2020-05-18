@@ -4,7 +4,7 @@
 \alias{audit}
 \title{Provide an R session audit}
 \usage{
-audit(filename = "", pbs_jobid = "not known")
+audit(filename = "", pbs_jobid = get_pbs_jobid())
 }
 \arguments{
 \item{filename}{character, the name of the file to dump to or "" to print to console}

@@ -1,3 +1,14 @@
+#' Retrieve the PBS JIOBID if available
+#'
+#' @export
+#' @param missing_text character, the text to return if now jobid found'
+#' @return character jobid or missing_text value
+get_pbs_jobid <- function(missing_text = "not known"){
+  PBS_JOBID <- Sys.getenv("PBS_JOBID")
+  if (nchar(PBS_JOBID) == 0) PBS_JOBID <- "not in PBS queue"
+  PBS_JOBID
+}
+
 
 #' Provide an R session audit
 #'
@@ -5,7 +16,7 @@
 #' @param filename character, the name of the file to dump to or "" to print to console
 #' @param pbs_jobid character, the OPBS jobid if known
 #' @return NULL invisibly
-audit <- function(filename = "", pbs_jobid = "not known"){
+audit <- function(filename = "", pbs_jobid = get_pbs_jobid()){
   cat("Audit date:", format(Sys.time(), "%Y-%m-%d %H:%M:%S", usetz = TRUE), "\n",
     file = filename)
   cat("System PID:", Sys.getpid(), "\n", file = filename, append = TRUE)
@@ -50,16 +61,15 @@ count_cores <- function(){
 
 #' Given a path - make it if it doesn't exist
 #' 
-#' We don't use R's \code{dir.create} in case we a reaching across volumes which 
-#' has caused headaches at time.
-#' 
 #' @export
 #' @param path character, the path to check and/or create
-#' @return logical, TRUE if the path exists
-make_path <- function(path){
+#' @param recursive logical, create paths recursively?
+#' @param ... other arguments for \code{\link[base]{dir.create}}
+#' @return logical, TRUE if the path exists or is created
+make_path <- function(path, recursive = TRUE, ...){
   ok <- dir.exists(path[1])
   if (!ok){
-    ok <- system2("mkdir", args = path[1]) == 0
+    ok <- dir.create(path, recursive = recursive, ...)
   }
   ok
 }
@@ -244,4 +254,29 @@ list_fastq <- function(path,
     reverse = sort(list.files(path, pattern = pattern_reverse, full.names = TRUE)) )
 }
 
+#' List files and separate into forward and reverse file lists based upon filenaming patterns
+#' 
+#' @export
+#' @param path character, the input path
+#' @param pattern_forward file pattern 
+#' @param pattern_reverse file pattern
+#' @param glob logical, if \code{TRUE} the input patterns are considered file globs like "*_R1_001.fastq" and will be converted to regex patterns using \code{\link[utils]{glob2rx}}.  If glob is \code{FALSE} then the the patterns are passed to \code{\link[base]{list.files}} as provided by the user.
+#' @param ... further arguments for \code{\link[base]{list.files}}
+#' @return named list of sorted foreward and reverse filenames
+list_filepairs <- function(path,
+                       pattern_forward = "*_R1_001.fastq",
+                       pattern_reverse = "*_R2_001.fastq",
+                       glob = TRUE,
+                       ...){
+  
+  if (glob){
+    pattern_forward = utils::glob2rx(pattern_forward)
+    pattern_reverse = utils::glob2rx(pattern_reverse)
+
+  }
+  
+  list(
+    forward = sort(list.files(path, pattern = pattern_forward, full.names = TRUE, ...)),
+    reverse = sort(list.files(path, pattern = pattern_reverse, full.names = TRUE, ...)) )
+}
 

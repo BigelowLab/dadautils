@@ -4,15 +4,18 @@
 \alias{make_path}
 \title{Given a path - make it if it doesn't exist}
 \usage{
-make_path(path)
+make_path(path, recursive = TRUE, ...)
 }
 \arguments{
 \item{path}{character, the path to check and/or create}
+
+\item{recursive}{logical, create paths recursively?}
+
+\item{...}{other arguments for \code{\link[base]{dir.create}}}
 }
 \value{
-logical, TRUE if the path exists
+logical, TRUE if the path exists or is created
 }
 \description{
-We don't use R's \code{dir.create} in case we a reaching across volumes which 
-has caused headaches at time.
+Given a path - make it if it doesn't exist
 }
