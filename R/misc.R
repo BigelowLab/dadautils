@@ -237,6 +237,24 @@ add_extension <- function(
   filename
 }
 
+
+#' Verify that a list of file pairs is suitable for processing
+#'
+#' @export
+#' @param x a list with file pairings as character vectors
+#' @param elements character, the names of the file pair elements to test
+#' @return the input list 
+verify_filepairs <- function(x, elements = c("forward", "reverse")){
+
+  if (!all((elements %in% names(x)))) stop("input is missing one or more required elements")
+  
+  ll <- sapply(elements, function(e) length(x[[e]]))
+  
+  if (!all(ll %in% ll[1])) stop("elements of input must be the same length")
+  
+  x
+}
+
   
 #' List fastq files and separate into forward and reverse reads
 #' 
@@ -261,12 +279,14 @@ list_fastq <- function(path,
 #' @param pattern_forward file pattern 
 #' @param pattern_reverse file pattern
 #' @param glob logical, if \code{TRUE} the input patterns are considered file globs like "*_R1_001.fastq" and will be converted to regex patterns using \code{\link[utils]{glob2rx}}.  If glob is \code{FALSE} then the the patterns are passed to \code{\link[base]{list.files}} as provided by the user.
+#' @param verify logical, if TRUE test that the filepairs are the same length 
 #' @param ... further arguments for \code{\link[base]{list.files}}
 #' @return named list of sorted foreward and reverse filenames
 list_filepairs <- function(path,
                        pattern_forward = "*_R1_001.fastq",
                        pattern_reverse = "*_R2_001.fastq",
                        glob = TRUE,
+                       verify = TRUE,
                        ...){
   
   if (glob){
@@ -275,8 +295,12 @@ list_filepairs <- function(path,
 
   }
   
-  list(
+  x <- list(
     forward = sort(list.files(path, pattern = pattern_forward, full.names = TRUE, ...)),
     reverse = sort(list.files(path, pattern = pattern_reverse, full.names = TRUE, ...)) )
+  
+  if (verify) x <- verify_filepairs(x)
+  
+  x
 }
 
