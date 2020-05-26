@@ -20,10 +20,15 @@ run_cutadapt <- function(
   R1.flags <- paste("-g", CFG$primer$FWD, "-a", REV.RC)
   R2.flags <- paste("-G", CFG$primer$REV, "-A", FWD.RC)
 
+  if (is.numeric(CFG$multithread) && (CFG$multithread > 1)) {
+    CFG$cutadapt$more_args <- paste0(CFG$cutadapt$more_args, " --cores=",CFG$multithread )
+  }
+
+  
   OK <- sapply(seq_along(cut_files$forward),
     function(i){
       if (save_output){
-        ofile <- paste0(strip_extension(cut_files$forward[1]), ".cutadapt_output.txt")
+        ofile <- paste0(strip_extension(cut_files$forward[i]), ".cutadapt_output.txt")
       } else {
         ofile <- ""
       }
