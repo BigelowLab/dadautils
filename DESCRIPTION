@@ -19,6 +19,7 @@ Imports:
 	readr,
 	configr,
 	dada2,
+	phyloseq,
 	Biostrings,
 	ShortRead,
 	IRanges,

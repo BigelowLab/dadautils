@@ -9,7 +9,7 @@ taxa_remove(
   vars = list(any = "Chloroplast"),
   taxa_levels = c("Kingdom", "Supergroup", "Division", "Class", "Order", "Family",
     "Genus", "Species"),
-  index = TRUE
+  index = FALSE
 )
 }
 \arguments{
