@@ -4,7 +4,7 @@
 \alias{edna_path}
 \title{Retrieve the edna storage path}
 \usage{
-edna_path(..., root = "/mnt/storage/projects/edna")
+edna_path(..., root = "/mnt/storage/data/edna")
 }
 \arguments{
 \item{...}{arguments for \code{\link[base]{file.path}}}
