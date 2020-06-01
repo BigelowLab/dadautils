@@ -150,3 +150,58 @@ plot_qualityProfile <- function(x,
   ok
 }
 
+
+
+#' Convert a table (like a tibble or data.frame) to a matrix
+#'
+#' Useful for reconstructing a \code{dada2} matrix from an eDNA table
+#' 
+#' @export
+#' @param x table object like a tibble or data.frame
+#' @param rowname the column (variable) to use as source of rownames (before optional transpose)
+#' @param transpose logical, if TRUE transpose just before returning.  
+#' @param a matrix with column and row names
+table_as_matrix <- function(x, 
+  rowname = 1,
+  transpose = TRUE){
+  
+  cnames <- colnames(x)
+  rnames <- x[[rowname]]
+  m <- x %>%
+    dplyr::select(-tidyselect::all_of(rowname)) %>%
+    as.matrix()
+  rownames(m) <- rnames
+  if (transpose) m <- t(m)
+  return(m)
+}
+
+
+
+#' Convert an eDNA sequence counts table to a \code{dada2} friendly matrix
+#'
+#' @export
+#' @param x filename or table, if a filename we try to read it as CSV
+#' @return \code{dada2} friendly matrix
+seqtab_to_matrix <- function(x){
+  if (is.character(x) && file.exists(x[1])){ 
+    x <- supressMessages(readr::read_csv(filename))
+  } 
+  table_as_matrix(x)
+}
+
+#' Convert an eDNA taxonomy table to a \code{dada2} friendly matrix
+#'
+#' @export
+#' @param x filename or table, if a filename we try to read it as CSV
+#' @param ... further arguments for \code{\link{table_to_matrix}}
+#' @return \code{dada2} friendly matrix
+taxtable_to_matrix <- function(x, ...){
+   if (is.character(x) && file.exists(x[1])){ 
+    x <- supressMessages(readr::read_csv(filename))
+  } 
+  keep <- c("ASV", "Kingdom", "Supergroup", "Division", "Phylum", "Class", "Order", 
+            "Family", "Genus", "Species")
+  x %>%
+   dplyr::select(tidyselect::any_of(keep)) %>%
+   table_as_matrix(transpose = FALSE)
+}
