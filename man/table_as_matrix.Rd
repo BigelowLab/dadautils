@@ -12,8 +12,9 @@ table_as_matrix(x, rowname = 1, transpose = TRUE)
 \item{rowname}{the column (variable) to use as source of rownames (before optional transpose)}
 
 \item{transpose}{logical, if TRUE transpose just before returning.}
-
-\item{a}{matrix with column and row names}
+}
+\value{
+a matrix with column and row names
 }
 \description{
 Useful for reconstructing a \code{dada2} matrix from an eDNA table

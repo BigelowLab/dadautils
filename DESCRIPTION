@@ -16,7 +16,6 @@ Imports:
   grDevices,
 	rlang,
   dplyr,
-  tidyselect,
 	readr,
 	configr,
 	dada2,

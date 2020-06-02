@@ -160,7 +160,7 @@ plot_qualityProfile <- function(x,
 #' @param x table object like a tibble or data.frame
 #' @param rowname the column (variable) to use as source of rownames (before optional transpose)
 #' @param transpose logical, if TRUE transpose just before returning.  
-#' @param a matrix with column and row names
+#' @return a matrix with column and row names
 table_as_matrix <- function(x, 
   rowname = 1,
   transpose = TRUE){
@@ -184,7 +184,7 @@ table_as_matrix <- function(x,
 #' @return \code{dada2} friendly matrix
 seqtab_to_matrix <- function(x){
   if (is.character(x) && file.exists(x[1])){ 
-    x <- supressMessages(readr::read_csv(filename))
+    x <- suppressMessages(readr::read_csv(x))
   } 
   table_as_matrix(x)
 }
@@ -193,11 +193,11 @@ seqtab_to_matrix <- function(x){
 #'
 #' @export
 #' @param x filename or table, if a filename we try to read it as CSV
-#' @param ... further arguments for \code{\link{table_to_matrix}}
+#' @param ... further arguments for \code{table_to_matrix}
 #' @return \code{dada2} friendly matrix
 taxtable_to_matrix <- function(x, ...){
    if (is.character(x) && file.exists(x[1])){ 
-    x <- supressMessages(readr::read_csv(filename))
+    x <- suppressMessages(readr::read_csv(x))
   } 
   keep <- c("ASV", "Kingdom", "Supergroup", "Division", "Phylum", "Class", "Order", 
             "Family", "Genus", "Species")

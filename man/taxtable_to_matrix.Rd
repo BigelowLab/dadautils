@@ -9,7 +9,7 @@ taxtable_to_matrix(x, ...)
 \arguments{
 \item{x}{filename or table, if a filename we try to read it as CSV}
 
-\item{...}{further arguments for \code{\link{table_to_matrix}}}
+\item{...}{further arguments for \code{table_to_matrix}}
 }
 \value{
 \code{dada2} friendly matrix

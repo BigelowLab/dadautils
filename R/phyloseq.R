@@ -8,7 +8,7 @@
 #' @param refseq_fun the name of the function to call, by default \code{\link[Biostrings]{DNAStringSet}}.
 #'   Must accept the output of \code{\link[phyloseq]{taxa_names}}
 #' @return a \code{\link[phyloseq]{phyloseq}} object
-phyloseq <- function(otu_table = NULL, sample_data = NULL, tax_table = NULL,
+make_phyloseq <- function(otu_table = NULL, sample_data = NULL, tax_table = NULL,
   merge_refseq = TRUE, refseq_fun = Biostrings::DNAStringSet){
 
 
@@ -20,7 +20,7 @@ phyloseq <- function(otu_table = NULL, sample_data = NULL, tax_table = NULL,
     phyloseq::otu_table(otu_table, taxa_are_rows=FALSE, errorIfNULL = FALSE), 
     phyloseq::sample_data(sample_data, errorIfNULL = FALSE))
     
-  if (!is.null(tax_table)) phyloseq::tax_table(x) <- taxa_table
+  if (!is.null(tax_table)) phyloseq::tax_table(x) <- tax_table
     
   if (merge_refseq){
     ref <- refseq_fun(phyloseq::taxa_names(x))

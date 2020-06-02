@@ -42,11 +42,11 @@ read_RDS <- function(file, ...){
 #' Retrieve the PBS JIOBID if available
 #'
 #' @export
-#' @param missing_text character, the text to return if now jobid found'
+#' @param no_pbs_text character, the text to return if no jobid found
 #' @return character jobid or missing_text value
-get_pbs_jobid <- function(missing_text = "not known"){
+get_pbs_jobid <- function(no_pbs_text = ""){
   PBS_JOBID <- Sys.getenv("PBS_JOBID")
-  if (nchar(PBS_JOBID) == 0) PBS_JOBID <- "not in PBS queue"
+  if (nchar(PBS_JOBID) == 0) PBS_JOBID <- no_pbs_text
   PBS_JOBID
 }
 
@@ -98,21 +98,6 @@ count_cores <- function(){
     ncpus <- as.integer(ncpus[1])
   }
   ncpus
-}
-
-#' Given a path - make it if it doesn't exist
-#' 
-#' @export
-#' @param path character, the path to check and/or create
-#' @param recursive logical, create paths recursively?
-#' @param ... other arguments for \code{\link[base]{dir.create}}
-#' @return logical, TRUE if the path exists or is created
-make_path <- function(path, recursive = TRUE, ...){
-  ok <- dir.exists(path[1])
-  if (!ok){
-    ok <- dir.create(path, recursive = recursive, ...)
-  }
-  ok
 }
 
 

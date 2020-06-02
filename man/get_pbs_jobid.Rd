@@ -4,10 +4,10 @@
 \alias{get_pbs_jobid}
 \title{Retrieve the PBS JIOBID if available}
 \usage{
-get_pbs_jobid(missing_text = "not known")
+get_pbs_jobid(no_pbs_text = "")
 }
 \arguments{
-\item{missing_text}{character, the text to return if now jobid found'}
+\item{no_pbs_text}{character, the text to return if no jobid found}
 }
 \value{
 character jobid or missing_text value

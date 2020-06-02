@@ -61,43 +61,27 @@ taxa_remove <- function(x,
   
   if (is.null(vars)) return(x)
 
-  if (index) {
-    INDEX <- rep(TRUE, nrow(x))
-    for (nm in names(vars)) {
-      if (tolower(nm) == 'any'){
-         idx <- sapply(taxa_levels,
-            function(vn){
-              x[[vn]] %in% vars[[nm]]
-            })
-          INDEX <- apply(idx, 1, any) & INDEX  
+  INDEX <- rep(TRUE, nrow(x))
+  for (nm in names(vars)) {
+    if (tolower(nm) == 'any'){
+       idx <- sapply(taxa_levels,
+          function(vn){
+            x[[vn]] %in% vars[[nm]]
+          })
+        INDEX <- apply(idx, 1, any) & INDEX  
+    } else {
+      if (nm %in% taxa_levels) {
+        INDEX <- INDEX & (x[[nm]] %in% vars[[nm]])
       } else {
-        if (nm %in% taxa_levels) {
-          INDEX <- INDEX & (x[[nm]] %in% vars[[nm]])
-        } else {
-          warning(sprintf("variable %s not found among columns of input", nm))
-        }
-      } 
-    }
-  } else {
-  
-    # not a nice iteration - but each loop removes from column !!nm the rows matching vars[[nm]] 
-    for (nm in names(vars)) {
-      if (nm == 'any'){
-        x <- x %>%
-          dplyr::filter_all(any_vars(. %in% vars[[nm]]))
-      } else {
-        if (nm %in% taxa_levels) {
-          x <- x %>%
-            dplyr::filter(!(!!nm %in% vars[[nm]]))
-        } else {
-          warning(sprintf("variable %s not found among taxa_levels", nm))
-        }
+        warning(sprintf("variable %s not found among columns of input", nm))
       }
-    }
+    } 
   }
-  if (index){
-    return(!INDEX)
+  
+  if (index) {
+    x <- !INDEX  
   } else {
-    return(x)
+    x <- dplyr::slice(x, !INDEX)
   }
+  x
 }
