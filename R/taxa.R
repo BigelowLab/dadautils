@@ -61,16 +61,18 @@ taxa_remove <- function(x,
   
   if (is.null(vars)) return(x)
 
+  tlevels <- taxa_levels[taxa_levels %in% colnames(x)]
   INDEX <- rep(TRUE, nrow(x))
+  
   for (nm in names(vars)) {
     if (tolower(nm) == 'any'){
-       idx <- sapply(taxa_levels,
+       idx <- sapply(tlevels,
           function(vn){
             x[[vn]] %in% vars[[nm]]
           })
         INDEX <- apply(idx, 1, any) & INDEX  
     } else {
-      if (nm %in% taxa_levels) {
+      if (nm %in% tlevels) {
         INDEX <- INDEX & (x[[nm]] %in% vars[[nm]])
       } else {
         warning(sprintf("variable %s not found among columns of input", nm))
@@ -81,7 +83,7 @@ taxa_remove <- function(x,
   if (index) {
     x <- !INDEX  
   } else {
-    x <- dplyr::slice(x, !INDEX)
+    x <- dplyr::filter(x, !INDEX)
   }
   x
 }

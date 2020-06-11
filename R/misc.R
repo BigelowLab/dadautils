@@ -69,8 +69,8 @@ audit <- function(filename = "", pbs_jobid = get_pbs_jobid()){
     file = filename, append = TRUE)
   for (lp in .libPaths()) cat("    ", lp, "\n",
                               file = filename, append = TRUE)
-  x <- as.data.frame(utils::installed.packages(), stringsAsFactors = FALSE)
-  x <- x[,c("Package", "Version",  "LibPath")]
+  x <- installed_packages() %>%
+    dplyr::select("Package", "Version",  "LibPath")
   cat("installed.packages():\n",
       file = filename, append = TRUE)
   if (nzchar(filename)){
@@ -81,6 +81,37 @@ audit <- function(filename = "", pbs_jobid = get_pbs_jobid()){
     print(x, row.names = FALSE)
   }
   invisible(NULL)
+}
+
+#' A wrapper around \code{installed.packages} the returns a table
+#'
+#' @export
+#' @param ... more arguments for \code{installed.packages}
+#' @return table
+installed_packages <- function(...){
+  dplyr::as_tibble(installed.packages(...))
+}
+
+
+#' A wrapper around \code{old.packages} the returns a table
+#'
+#' @export
+#' @param ... more arguments for \code{old.packages}
+#' @return table
+old_packages <- function(...){
+  dplyr::as_tibble(utils::old.packages(...))
+}
+
+#' Retrieve a table of packages suitable for updating
+#'
+#' @export
+#' @param lib_pattern character, A glob pattern specification that is used to filter
+#'    library locations
+#' @return a table of packages identified for update
+identify_upgrades <- function(lib_pattern = "^/mnt/modules/bin/dada2"){
+  
+  old_packages() %>%
+    dplyr::filter(grepl(lib_pattern, .data$LibPath))
 }
 
 #' Count the number of CPUs
