@@ -12,7 +12,7 @@ Provides utility functions for working with [dada2](https://benjjneb.github.io/d
 
 + [readr](https://CRAN.R-project.org/package=readr)
 
-+ [configr](https://CRAN.R-project.org/package=configr)
++ [yaml](https://CRAN.R-project.org/package=yaml)
 
 + [dada2](https://CRAN.R-project.org/package=dada2)
 
@@ -33,7 +33,7 @@ All of the requirements are preinstalled in the charlie module `dada2`.  If you 
 
 ### Installation from [github](https://github.com)
 
-You may need a [personal access token](https://github.com/settings/tokens).  We set the argument `upgrade` to `FALSE` so that the installer won't try to install packages in you home library that are already part of the module (but possibly as an older version.)
+You may need a [personal access token](https://github.com/settings/tokens).  We set the argument `upgrade` to `FALSE` so that the installer won't try to install packages in you home library that are already part of the module (but possibly as older versions.)
 
 ```
 remotes::install_github("BigelowLab/dadautils", upgrade = FALSE)
@@ -68,8 +68,8 @@ library(dadautils)
 ```
 
 ### Getting help
-```
 
+```
 ?dadautils
 ```
 
@@ -127,11 +127,12 @@ add_extension(filename, ".gz")
 #### Read a configuration file.
 
 ```
-cfg <- get_configuration("~/edna/edna-dada2/config/dada2_example.yml")
+cfg <- read_config("~/edna/edna-dada2/config/dada2_example.yml")
 ```
 
-#### Create an audit of the state of R (version, cores, library catalog). Print it to screen,
-or write it to a file.
+#### Create an audit of the state of R (version, cores, library catalog). 
+
+Print it to screen or write it to a file.
 
 ```
 audit()
