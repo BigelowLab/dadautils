@@ -186,8 +186,11 @@ add_extension <- function(
 }
 
 
-#' Verify that a list of file pairs is suitable for processing
+#' Verify that a list of file pairs is suitable for processing. 
 #'
+#' This will throw an error if there is a mismatch between the number of 
+#' elements in the list elements. Otherwise it simply passes the data through.
+#' 
 #' @export
 #' @param x a list with file pairings as character vectors
 #' @param elements character, the names of the file pair elements to test
@@ -214,7 +217,8 @@ verify_filepairs <- function(x, elements = c("forward", "reverse")){
 list_fastq <- function(path,
                        pattern_forward = "^.*_R1_001\\.fastq",
                        pattern_reverse = "^.*_R2_001\\.fastq"){
-  
+  .Deprecated('list_filepairs', package = 'dadautils',
+    msg = "Please use list_filepairs() which is more versatile")
   list(
     forward = sort(list.files(path, pattern = pattern_forward, full.names = TRUE)),
     reverse = sort(list.files(path, pattern = pattern_reverse, full.names = TRUE)) )
@@ -224,23 +228,25 @@ list_fastq <- function(path,
 #' 
 #' @export
 #' @param path character, the input path
-#' @param pattern_forward file pattern 
-#' @param pattern_reverse file pattern
-#' @param glob logical, if \code{TRUE} the input patterns are considered file globs like "*_R1_001.fastq" and will be converted to regex patterns using \code{\link[utils]{glob2rx}}.  If glob is \code{FALSE} then the the patterns are passed to \code{\link[base]{list.files}} as provided by the user.
+#' @param pattern_forward file pattern, the default is to match either "_R1_001.fastq" or "_R1_001.fastq.gz"
+#' @param pattern_reverse file pattern, the default is to match either "_R2_001.fastq" or "_R2_001.fastq.gz"
+#' @param glob logical, if \code{TRUE} the input patterns are considered file globs like "*_R1_001.fastq" 
+#'        and will be converted to regex patterns using \code{\link[utils]{glob2rx}}.  
+#'        If glob is \code{FALSE} then the the patterns are passed to \code{\link[base]{list.files}} 
+#'        as provided by the user.
 #' @param verify logical, if TRUE test that the filepairs are the same length 
 #' @param ... further arguments for \code{\link[base]{list.files}}
 #' @return named list of sorted foreward and reverse filenames
 list_filepairs <- function(path,
-                       pattern_forward = "*_R1_001.fastq",
-                       pattern_reverse = "*_R2_001.fastq",
-                       glob = TRUE,
+                       pattern_forward = "_R1_001.fastq",
+                       pattern_reverse = "_R2_001.fastq",
+                       glob = FALSE,
                        verify = TRUE,
                        ...){
   
   if (glob){
     pattern_forward = utils::glob2rx(pattern_forward)
     pattern_reverse = utils::glob2rx(pattern_reverse)
-
   }
   
   x <- list(

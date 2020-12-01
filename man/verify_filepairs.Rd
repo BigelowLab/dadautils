@@ -2,7 +2,7 @@
 % Please edit documentation in R/misc.R
 \name{verify_filepairs}
 \alias{verify_filepairs}
-\title{Verify that a list of file pairs is suitable for processing}
+\title{Verify that a list of file pairs is suitable for processing.}
 \usage{
 verify_filepairs(x, elements = c("forward", "reverse"))
 }
@@ -15,5 +15,6 @@ verify_filepairs(x, elements = c("forward", "reverse"))
 the input list
 }
 \description{
-Verify that a list of file pairs is suitable for processing
+This will throw an error if there is a mismatch between the number of 
+elements in the list elements. Otherwise it simply passes the data through.
 }
