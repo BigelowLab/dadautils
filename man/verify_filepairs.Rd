@@ -15,6 +15,6 @@ verify_filepairs(x, elements = c("forward", "reverse"))
 the input list
 }
 \description{
-This will throw an error if there is a mismatch between the number of 
+This will throw an error if there is a mismatch between the number of
 elements in the list elements. Otherwise it simply passes the data through.
 }

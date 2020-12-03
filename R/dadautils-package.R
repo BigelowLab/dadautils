@@ -6,17 +6,17 @@
 #' @aliases dadautils
 #' @importFrom rlang .data
 #' @importFrom dplyr %>%
-#' @importFrom grDevices dev.off pdf 
-#' @importFrom utils installed.packages write.csv 
+#' @importFrom grDevices dev.off pdf
+#' @importFrom utils installed.packages write.csv
 NULL
 
 #' Deprecated functions in dadautils
-#' 
+#'
 #' These functions still work but should be avoided.
-#' 
+#'
 #' \itemize{
 #'  \item \code{\link{list_fastq}}: Please use \code{\link{list_filepairs}}
 #' }
-#' 
+#'
 #' @name dadautils-deprecated
 NULL

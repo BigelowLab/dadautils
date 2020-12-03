@@ -23,9 +23,9 @@ as list with the following elements
   \item{opts list of inut arguments}
   \item{stat_data} table of statistical results
   \item{ann_data} table of annotation info
-  \item{plot_data} table of stats transformed for plotting    
+  \item{plot_data} table of stats transformed for plotting
   \item{plot_summary} table of summary stats for plotting
-  \item{plot} ggplot2 object suitable for printing         
+  \item{plot} ggplot2 object suitable for printing
 }
 }
 \description{
@@ -35,7 +35,7 @@ that includes tables of ancillary statistics in addition to a printable plot obj
 \examples{
 \dontrun{
   result <- quality_profile(system.file("extdata", "sam1F.fastq.gz", package="dada2"))
-  print(result$plot) 
+  print(result$plot)
  }
 }
 \seealso{

@@ -1,5 +1,5 @@
 #' Retrieve an integer vector of known logger levels for \code{futile.logger}
-#' 
+#'
 #' @export
 #' @return a named integer vector
 logger_levels <- function(){
@@ -109,14 +109,14 @@ old_packages <- function(...){
 #'    library locations
 #' @return a table of packages identified for update
 identify_upgrades <- function(lib_pattern = "^/mnt/modules/bin/dada2"){
-  
+
   old_packages() %>%
     dplyr::filter(grepl(lib_pattern, .data$LibPath))
 }
 
 #' Count the number of CPUs
 #'
-#' If the number of CPUS has been specified for a PBS session then retrieves the values 
+#' If the number of CPUS has been specified for a PBS session then retrieves the values
 #' of environment variable '$NCPUS' otherwise this is wrap of \code{\link[parallel]{detectCores}}
 #'
 #' @export
@@ -131,7 +131,31 @@ count_cores <- function(){
   ncpus
 }
 
+#' Extract sample names fromn a list of filenames
+#'
+#' @export
+#' @param x character, vector of one or more filenames.  This also could be a
+#'   list ala \code{\link{list_filepairs}} in which case it must have a
+#'   the specified element name \code{name}
+#' @param rule character, the name of the rule to use
+#' @param name character, the name of the liust element to find filenames if \code{x} is a list
+#' @return character vector of sample names - one per input
+extract_sample_names <- function(x,
+  rule = "before first _"){
 
+  if (is.list(x)){
+    if (!(name[1] %in% names(x))){
+      stop("if x is a list it must have a ", name[1],  "element")
+    }
+    x <- x[[name[1]]]
+  }
+  sample_names = switch(rule[1],
+      "before first _" = sapply(strsplit(basename(x), "_"), `[`, 1),
+      stop("rule not known - check with progammer to add a rule")
+    )
+
+  sample_names
+}
 
 
 
@@ -146,9 +170,9 @@ count_cores <- function(){
 strip_extension <- function(
   filename = c("BR2_2016_S216_L001_R2_001.fastq", "foobar.fastq.gz", "fuzzbaz.txt"),
   ext = ".fastq"){
-  
+
   ix <- gregexpr(ext, filename, fixed = TRUE)
-  sapply(seq_along(ix), 
+  sapply(seq_along(ix),
     function(i){
       if (ix[[i]] != -1) {
         s <- substring(filename[i], 1, ix[[i]]-1)
@@ -172,8 +196,8 @@ add_extension <- function(
   filename = c("BR2_2016_S216_L001_R2_001.fastq", "foobar.fastq.gz", "fuzzbaz.txt"),
   ext = ".gz",
   no_dup = TRUE){
-  
-  
+
+
   if (no_dup){
     pat <- paste0("^.*\\", ext[1], "$")
     ix <- grepl(pat, filename)
@@ -181,37 +205,37 @@ add_extension <- function(
   } else {
     filename <- paste0(filename, ext[1])
   }
-  
+
   filename
 }
 
 
-#' Verify that a list of file pairs is suitable for processing. 
+#' Verify that a list of file pairs is suitable for processing.
 #'
-#' This will throw an error if there is a mismatch between the number of 
+#' This will throw an error if there is a mismatch between the number of
 #' elements in the list elements. Otherwise it simply passes the data through.
-#' 
+#'
 #' @export
 #' @param x a list with file pairings as character vectors
 #' @param elements character, the names of the file pair elements to test
-#' @return the input list 
+#' @return the input list
 verify_filepairs <- function(x, elements = c("forward", "reverse")){
 
   if (!all((elements %in% names(x)))) stop("input is missing one or more required elements")
-  
+
   ll <- sapply(elements, function(e) length(x[[e]]))
-  
+
   if (!all(ll %in% ll[1])) stop("elements of input must be the same length")
-  
+
   x
 }
 
-  
+
 #' List fastq files and separate into forward and reverse reads
-#' 
+#'
 #' @export
 #' @param path character, the input path
-#' @param pattern_forward file pattern 
+#' @param pattern_forward file pattern
 #' @param pattern_reverse file pattern
 #' @return named list of sorted foreward and reverse fastq filenames
 list_fastq <- function(path,
@@ -225,16 +249,16 @@ list_fastq <- function(path,
 }
 
 #' List files and separate into forward and reverse file lists based upon filenaming patterns
-#' 
+#'
 #' @export
 #' @param path character, the input path
 #' @param pattern_forward file pattern, the default is to match either "_R1_001.fastq" or "_R1_001.fastq.gz"
 #' @param pattern_reverse file pattern, the default is to match either "_R2_001.fastq" or "_R2_001.fastq.gz"
-#' @param glob logical, if \code{TRUE} the input patterns are considered file globs like "*_R1_001.fastq" 
-#'        and will be converted to regex patterns using \code{\link[utils]{glob2rx}}.  
-#'        If glob is \code{FALSE} then the the patterns are passed to \code{\link[base]{list.files}} 
+#' @param glob logical, if \code{TRUE} the input patterns are considered file globs like "*_R1_001.fastq"
+#'        and will be converted to regex patterns using \code{\link[utils]{glob2rx}}.
+#'        If glob is \code{FALSE} then the the patterns are passed to \code{\link[base]{list.files}}
 #'        as provided by the user.
-#' @param verify logical, if TRUE test that the filepairs are the same length 
+#' @param verify logical, if TRUE test that the filepairs are the same length
 #' @param ... further arguments for \code{\link[base]{list.files}}
 #' @return named list of sorted foreward and reverse filenames
 list_filepairs <- function(path,
@@ -243,18 +267,17 @@ list_filepairs <- function(path,
                        glob = FALSE,
                        verify = TRUE,
                        ...){
-  
+
   if (glob){
     pattern_forward = utils::glob2rx(pattern_forward)
     pattern_reverse = utils::glob2rx(pattern_reverse)
   }
-  
+
   x <- list(
     forward = sort(list.files(path, pattern = pattern_forward, full.names = TRUE, ...)),
     reverse = sort(list.files(path, pattern = pattern_reverse, full.names = TRUE, ...)) )
-  
+
   if (verify) x <- verify_filepairs(x)
-  
+
   x
 }
-

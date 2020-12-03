@@ -20,9 +20,9 @@ list_filepairs(
 
 \item{pattern_reverse}{file pattern, the default is to match either "_R2_001.fastq" or "_R2_001.fastq.gz"}
 
-\item{glob}{logical, if \code{TRUE} the input patterns are considered file globs like "*_R1_001.fastq" 
-and will be converted to regex patterns using \code{\link[utils]{glob2rx}}.  
-If glob is \code{FALSE} then the the patterns are passed to \code{\link[base]{list.files}} 
+\item{glob}{logical, if \code{TRUE} the input patterns are considered file globs like "*_R1_001.fastq"
+and will be converted to regex patterns using \code{\link[utils]{glob2rx}}.
+If glob is \code{FALSE} then the the patterns are passed to \code{\link[base]{list.files}}
 as provided by the user.}
 
 \item{verify}{logical, if TRUE test that the filepairs are the same length}
