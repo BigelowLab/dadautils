@@ -6,5 +6,8 @@
 \alias{dadautils}
 \title{dadautils-package}
 \description{
-Provides added tools for working with the [dada2](https://benjjneb.github.io/dada2/index.html) package in the eDNA project.
+Provides added tools for working with the \href{https://benjjneb.github.io/dada2/index.html}{dada2} package in the eDNA project.
+}
+\seealso{
+\href{https://github.com/BigelowLab/charlier}{charlier} companion package
 }

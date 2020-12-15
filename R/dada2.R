@@ -124,7 +124,7 @@ merge_pairs <- function(filelist, dada_r,
     filelist$reverse,
     ...)
     if (save_output){
-      saveRDS(errs, file = file.path(output_path, "mergers.rds"))
+      saveRDS(x, file = file.path(output_path, "mergers.rds"))
     }
   x
 }
@@ -151,7 +151,7 @@ count_uniques <- function(x, ...){
 plot_qualityProfiles <- function(x,
   n = 2,
   ofile = "quality_profiles.pdf"){
-    
+
   ix <- seq_len(n)
   pdf(ofile)
   print(dadautils::plot_qualityProfile(x$forward[ix]))
@@ -232,6 +232,22 @@ taxtable_to_matrix <- function(x, ...){
    table_as_matrix(transpose = FALSE)
 }
 
+
+#' Count the charcater lengths of sequences
+#'
+#' @export
+#' @param x matrix table of sequences as per \code{\link[dada2]{removeBimeraDenovo}}
+#' @param ofile character or NA, if not NA save result to a CSV file
+#' @return character counts
+sequence_lengths <- function(x,
+  ofile = c(NA, "sequence_lengths.csv")[1]){
+
+  n <- nchar(dada2::getSequences(x))
+  if (!is.na(ofile)){
+    readr::write_csv(dplyr::as_tibble(n), ofile)
+  }
+  n
+}
 
 
 #' Compute quality profiles for one or more FastQ files.

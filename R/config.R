@@ -15,6 +15,9 @@ autopopulate_config <- function(
       )
     ){
     
+    .Deprecated("autopopulate_config", package= "charlier", 
+      msg = "Please use charlier::autopopulate - note subtle argument changes")
+    
       # anything to do?
     if (is.null(x$global) || is.null(fields)){ return(x) }
       

@@ -15,6 +15,9 @@ edna_path <- function(..., root = "/mnt/storage/data/edna"){
 #' @param ... other arguments for \code{\link[base]{dir.create}}
 #' @return logical, TRUE if the path exists or is created
 make_path <- function(path, recursive = TRUE, ...){
+  .Deprecated("make_path", package = 'charlier',
+    msg = "Please use charlier::make_path")
+    
   ok <- dir.exists(path[1])
   if (!ok){
     ok <- dir.create(path, recursive = recursive, ...)

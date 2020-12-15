@@ -3,6 +3,9 @@
 #' @export
 #' @return a named integer vector
 logger_levels <- function(){
+  
+  .Deprecated("logger_levels", package = "charlier",
+    msg = "Please use charlier::logger_levels")
   c(FATAL = 1L, ERROR = 2L, WARN = 4L, INFO = 6L, DEBUG = 8L, TRACE = 9L)
 }
 
@@ -22,6 +25,8 @@ logger_levels <- function(){
 #' }
 write_RDS <- function(object, file = "", ...){
 
+  .Deprecated("write_RDS", package = "charlier",
+    msg = "Please use charlier::write_RDS")
   saveRDS(object, file = file, ...)
   invisible(object)
 }
@@ -33,7 +38,8 @@ write_RDS <- function(object, file = "", ...){
 #' @param ... other arguments for \code{\link[base]{readRDS}}
 #' @return R object
 read_RDS <- function(file, ...){
-
+  .Deprecated("read_RDS", package = "charlier",
+    msg = "Please use charlier::read_RDS")
   readRDS(file, ...)
 }
 
@@ -45,6 +51,10 @@ read_RDS <- function(file, ...){
 #' @param no_pbs_text character, the text to return if no jobid found
 #' @return character jobid or missing_text value
 get_pbs_jobid <- function(no_pbs_text = ""){
+  
+  .Deprecated("get_pbs_jobid", package = "charlier",
+    msg = "Please use charlier::get_pbs_jobid")
+    
   PBS_JOBID <- Sys.getenv("PBS_JOBID")
   if (nchar(PBS_JOBID) == 0) PBS_JOBID <- no_pbs_text
   PBS_JOBID
@@ -58,6 +68,10 @@ get_pbs_jobid <- function(no_pbs_text = ""){
 #' @param pbs_jobid character, the OPBS jobid if known
 #' @return NULL invisibly
 audit <- function(filename = "", pbs_jobid = get_pbs_jobid()){
+  
+  .Deprecated("audit", package = "charlier",
+    msg = "Please use charlier::audit")
+  
   cat("Audit date:", format(Sys.time(), "%Y-%m-%d %H:%M:%S", usetz = TRUE), "\n",
     file = filename)
   cat("System PID:", Sys.getpid(), "\n", file = filename, append = TRUE)
@@ -122,6 +136,8 @@ identify_upgrades <- function(lib_pattern = "^/mnt/modules/bin/dada2"){
 #' @export
 #' @return integer count of cores
 count_cores <- function(){
+  .Deprecated("count_cores", package = "charlier",
+    msg = "Please use charlier::count_cores")
   ncpus <- Sys.getenv("NCPUS")
   if (nchar(ncpus) == 0){
    ncpus <- parallel::detectCores()
@@ -138,16 +154,17 @@ count_cores <- function(){
 #'   list ala \code{\link{list_filepairs}} in which case it must have a
 #'   the specified element name \code{name}
 #' @param rule character, the name of the rule to use
-#' @param name character, the name of the liust element to find filenames if \code{x} is a list
+#' @param element character, the name of the list element used to find filenames if \code{x} is a list
 #' @return character vector of sample names - one per input
 extract_sample_names <- function(x,
-  rule = "before first _"){
+  rule = "before first _",
+  element = "forward"){
 
   if (is.list(x)){
-    if (!(name[1] %in% names(x))){
-      stop("if x is a list it must have a ", name[1],  "element")
+    if (!(element[1] %in% names(x))){
+      stop("if x is a list it must have a ", element[1],  "element")
     }
-    x <- x[[name[1]]]
+    x <- x[[element[1]]]
   }
   sample_names = switch(rule[1],
       "before first _" = sapply(strsplit(basename(x), "_"), `[`, 1),
@@ -171,6 +188,9 @@ strip_extension <- function(
   filename = c("BR2_2016_S216_L001_R2_001.fastq", "foobar.fastq.gz", "fuzzbaz.txt"),
   ext = ".fastq"){
 
+  .Deprecated("strip_extension", package = "charlier",
+      msg = "Please use charlier::strip_extension")
+      
   ix <- gregexpr(ext, filename, fixed = TRUE)
   sapply(seq_along(ix),
     function(i){
@@ -197,6 +217,8 @@ add_extension <- function(
   ext = ".gz",
   no_dup = TRUE){
 
+    .Deprecated("add_extension", package = "charlier",
+        msg = "Please use charlier::add_extension")
 
   if (no_dup){
     pat <- paste0("^.*\\", ext[1], "$")
