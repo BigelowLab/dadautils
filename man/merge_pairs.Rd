@@ -4,22 +4,14 @@
 \alias{merge_pairs}
 \title{Merge pairs ala dada2::mergePairs}
 \usage{
-merge_pairs(
-  filelist,
-  dada_r,
-  output_path = dirname(filelist$forward[1]),
-  save_output = TRUE,
-  ...
-)
+merge_pairs(filelist, dada_r, save_output = TRUE, ...)
 }
 \arguments{
 \item{filelist}{list of forward and reverse fastq files}
 
 \item{dada_r}{list of dada2::dada results}
 
-\item{output_path}{character, the output path}
-
-\item{save_output}{logical, if TRUE save the output to the specified output_path}
+\item{save_output}{logical, if TRUE save the output as RDS}
 
 \item{...}{arguments for \code{\link[dada2]{mergePairs}}}
 }

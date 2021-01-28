@@ -26,5 +26,6 @@ Imports:
 	ShortRead,
 	IRanges,
 	patchwork,
-	ggplot2
+	ggplot2,
+  charlier
 RoxygenNote: 7.1.1

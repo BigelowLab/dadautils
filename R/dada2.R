@@ -19,8 +19,8 @@ filter_and_trim <- function(filelist,
   rfilt <- file.path(output_path, basename(filelist$reverse))
 
   if (compress){
-    ffilt <- add_extension(ffilt, ext = ".gz", no_dup = TRUE)
-    rfilt <- add_extension(rfilt, ext = ".gz", no_dup = TRUE)
+    ffilt <- charlier::add_extension(ffilt, ext = ".gz", no_dup = TRUE)
+    rfilt <- charlier::add_extension(rfilt, ext = ".gz", no_dup = TRUE)
   }
 
   x <- dada2::filterAndTrim(filelist$forward,
@@ -108,22 +108,21 @@ run_dada <- function(filelist, errs,
 #' @export
 #' @param filelist list of forward and reverse fastq files
 #' @param dada_r  list of dada2::dada results
-#' @param output_path character, the output path
-#' @param save_output logical, if TRUE save the output to the specified output_path
+#' @param save_output logical, if TRUE save the output as RDS
 #' @param ... arguments for \code{\link[dada2]{mergePairs}}
 #' @return as returned by \code{\link[dada2]{mergePairs}}
 merge_pairs <- function(filelist, dada_r,
-  output_path = dirname(filelist$forward[1]),
   save_output = TRUE,
   ...){
-  filelist <- lapply(filelist, dada2::derepFastq)
+  ff <- lapply(filelist, dada2::derepFastq)
   x <- dada2::mergePairs(
     dada_r$forward,
-    filelist$forward,
+    ff$forward,
     dada_r$reverse,
-    filelist$reverse,
+    ff$reverse,
     ...)
     if (save_output){
+      output_path <- dirname(filelist$forward[1])
       saveRDS(x, file = file.path(output_path, "mergers.rds"))
     }
   x

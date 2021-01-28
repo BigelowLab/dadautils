@@ -6,9 +6,14 @@
 #' @param taxLevels character, \code{\link[dada2]{assignTaxonomy}}
 #' @param populate_truncated logical, if TRUE make sure each level of \code{taxLevel} is 
 #' represented in the returned value
-#' @param truncated_value character or NA (default), value to assign to truncated levels
+#' @param truncated_value character or NA (default), value to assign to truncated levels.
+#'   If \code{TRUE} then \code{minBoot} is ignored - see \code{\link[dada2]{assignTaxonomy}}
 #' @param drop_levels character, NA or a vector of levels to drop. Typical to drop 'Species'
-#'        if \code{\link[dada2]{addSpecies}} is to be added next.
+#'        if \code{\link[dada2]{addSpecies}} is to be added next. If \code{TRUE} then \code{minBoot} 
+#'        is ignored - see \code{\link[dada2]{assignTaxonomy}}
+#' save_file logical, if TRUE save the file as CSV. If \code{TRUE} then \code{minBoot} is ignored 
+#'        - see \code{\link[dada2]{assignTaxonomy}}
+#' ofile character, the file to write to if save_file is TRUE
 #' @param ... further arguments for \code{\link[dada2]{assignTaxonomy}}
 #' @return character matrix
 assign_taxonomy <- function(seqs, 
@@ -16,23 +21,38 @@ assign_taxonomy <- function(seqs,
   populate_truncated = TRUE,
   truncated_value = NA_character_,
   drop_levels = c(NA_character_, "Species")[1],
+  save_file = FALSE,
+  filename = "taxa.csv",
   ...){
   
     x <- dada2::assignTaxonomy(seqs, taxLevels = taxLevels, ...)  
     if (populate_truncated){
+      if (length(x) == 2 && "tax" %in% names(x)){
+        x <- x$tax
+      }
       ix <- taxLevels %in% colnames(x)
       if (!all(ix)) {
         ix <- taxLevels[!ix]
         y <- matrix(truncated_value, 
           ncol = length(ix), 
           nrow = nrow(x),
-          dimnames = list(rownames(x), ix))
+          dimnames = list(rownames(tax), ix))
         x <- cbind(x,y)
       }
     }  
     if (!is.na(drop_levels[1])){
-      ix <- colnames(x) %in% drop_levels
+      if (length(x) == 2 && "tax" %in% names(x)){
+        x <- x$tax
+      }
+      ix <- colnames(tax) %in% drop_levels
       x <- x[, !ix, drop = FALSE]
+    }
+    if (save_file){
+      if (length(x) == 2 && "tax" %in% names(x)){
+        readr::write_csv(x$tax %>% dplyr::as_tibble(), filename)
+      } else {
+        readr::write_csv(x %>% dplyr::as_tibble(), filename)
+      }
     }
     x
   }

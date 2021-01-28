@@ -11,6 +11,8 @@ assign_taxonomy(
   populate_truncated = TRUE,
   truncated_value = NA_character_,
   drop_levels = c(NA_character_, "Species")[1],
+  save_file = FALSE,
+  filename = "taxa.csv",
   ...
 )
 }
@@ -22,10 +24,15 @@ assign_taxonomy(
 \item{populate_truncated}{logical, if TRUE make sure each level of \code{taxLevel} is 
 represented in the returned value}
 
-\item{truncated_value}{character or NA (default), value to assign to truncated levels}
+\item{truncated_value}{character or NA (default), value to assign to truncated levels.
+If \code{TRUE} then \code{minBoot} is ignored - see \code{\link[dada2]{assignTaxonomy}}}
 
 \item{drop_levels}{character, NA or a vector of levels to drop. Typical to drop 'Species'
-if \code{\link[dada2]{addSpecies}} is to be added next.}
+       if \code{\link[dada2]{addSpecies}} is to be added next. If \code{TRUE} then \code{minBoot} 
+       is ignored - see \code{\link[dada2]{assignTaxonomy}}
+save_file logical, if TRUE save the file as CSV. If \code{TRUE} then \code{minBoot} is ignored 
+       - see \code{\link[dada2]{assignTaxonomy}}
+ofile character, the file to write to if save_file is TRUE}
 
 \item{...}{further arguments for \code{\link[dada2]{assignTaxonomy}}}
 }
