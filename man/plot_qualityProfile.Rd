@@ -4,12 +4,12 @@
 \alias{plot_qualityProfile}
 \title{Plot quality profiles for one or more FASTQs}
 \usage{
-plot_qualityProfile(x, ofile = c(NA, "qualityProfile.pdf")[1], ...)
+plot_qualityProfile(x, filename = c(NA, "qualityProfile.pdf")[1], ...)
 }
 \arguments{
 \item{x}{character vector of fastq filenames}
 
-\item{ofile}{character, the name of the PDF file to generate of NA}
+\item{filename}{character, the name of the PDF file to generate or NA}
 
 \item{...}{further arguments for \code{\link[dada2]{plotQualityProfile}}}
 }

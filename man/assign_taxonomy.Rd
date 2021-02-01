@@ -28,11 +28,13 @@ represented in the returned value}
 If \code{TRUE} then \code{minBoot} is ignored - see \code{\link[dada2]{assignTaxonomy}}}
 
 \item{drop_levels}{character, NA or a vector of levels to drop. Typical to drop 'Species'
-       if \code{\link[dada2]{addSpecies}} is to be added next. If \code{TRUE} then \code{minBoot} 
-       is ignored - see \code{\link[dada2]{assignTaxonomy}}
-save_file logical, if TRUE save the file as CSV. If \code{TRUE} then \code{minBoot} is ignored 
-       - see \code{\link[dada2]{assignTaxonomy}}
-ofile character, the file to write to if save_file is TRUE}
+if \code{\link[dada2]{addSpecies}} is to be added next. If \code{TRUE} then \code{minBoot} 
+is ignored - see \code{\link[dada2]{assignTaxonomy}}}
+
+\item{save_file}{logical, if TRUE save the file as CSV. If TRUE then \code{minBoot} is ignored,
+see \code{\link[dada2]{assignTaxonomy}}}
+
+\item{filename}{character, the file to write to if save_file is TRUE}
 
 \item{...}{further arguments for \code{\link[dada2]{assignTaxonomy}}}
 }

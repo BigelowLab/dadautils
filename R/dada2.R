@@ -153,8 +153,8 @@ plot_qualityProfiles <- function(x,
 
   ix <- seq_len(n)
   pdf(ofile)
-  print(dadautils::plot_qualityProfile(x$forward[ix]))
-  print(dadautils::plot_qualityProfile(x$reverse[ix]))
+  print(dadautils::plot_qualityProfile(x$forward[ix]), filename = NA)
+  print(dadautils::plot_qualityProfile(x$reverse[ix]), filename = NA)
   dev.off()
 }
 
@@ -164,14 +164,14 @@ plot_qualityProfiles <- function(x,
 #'
 #' @export
 #' @param x character vector of fastq filenames
-#' @param ofile character, the name of the PDF file to generate of NA
+#' @param filename character, the name of the PDF file to generate or NA
 #' @param ... further arguments for \code{\link[dada2]{plotQualityProfile}}
 plot_qualityProfile <- function(x,
-  ofile = c(NA, "qualityProfile.pdf")[1],
+  filename = c(NA, "qualityProfile.pdf")[1],
   ...){
-  if (!is.na(ofile)) grDevices::pdf(ofile)
+  if (!is.na(filename[1])) grDevices::pdf(filename[1])
   ok <- dada2::plotQualityProfile(x, ...)
-  if (!is.na(ofile)) grDevices::dev.off()
+  if (!is.na(filename[1])) grDevices::dev.off()
   ok
 }
 
