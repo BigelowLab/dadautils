@@ -31,12 +31,22 @@ Provides utility functions for working with [dada2](https://benjjneb.github.io/d
 
 All of the requirements are preinstalled in the charlie module `dada2`.  If you are **not** operating within that module then installation of the above (and dependencies) is required.
 
+### Note
+
+This package is [dada2-centric](https://benjjneb.github.io/dada2/index.html) , but you may find the [charlier R package](https://github.com/BigelowLab/charlier) useful for general usage on charlie with `dadautils`.
+
 ### Installation from [github](https://github.com)
 
-You may need a [personal access token](https://github.com/settings/tokens).  We set the argument `upgrade` to `FALSE` so that the installer won't try to install packages in you home library that are already part of the module (but possibly as older versions.)
+You may need a [personal access token](https://github.com/settings/tokens) if you use github.  We set the argument `upgrade = FALSE` so that the installer won't try to install packages in you home library that are already part of the module (but possibly as older versions.)
 
 ```
+# if you have access to https://github.com/BigelowLab/dadautils
 remotes::install_github("BigelowLab/dadautils", upgrade = FALSE)
+
+# or 
+
+# if you have access to /mnt/storage/data/edna/packages/dadautils
+devtools::install("/mnt/storage/data/edna/packages/dadautils", upgrade = FALSE)
 ```
 
 ### Establishing a PBS environment and loading modules.
@@ -129,6 +139,8 @@ add_extension(filename, ".gz")
 ```
 cfg <- read_config("~/edna/edna-dada2/config/dada2_example.yml")
 ```
+
+See more about configurations in the [wiki](https://github.com/BigelowLab/dadautils/wiki/Configuration-file).
 
 #### Create an audit of the state of R (version, cores, library catalog). 
 
