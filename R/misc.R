@@ -261,8 +261,8 @@ verify_filepairs <- function(x, elements = c("forward", "reverse")){
 #' @param pattern_reverse file pattern
 #' @return named list of sorted foreward and reverse fastq filenames
 list_fastq <- function(path,
-                       pattern_forward = "^.*_R1_001\\.fastq",
-                       pattern_reverse = "^.*_R2_001\\.fastq"){
+                       pattern_forward = "^.*_R1_001",
+                       pattern_reverse = "^.*_R2_001"){
   .Deprecated('list_filepairs', package = 'dadautils',
     msg = "Please use list_filepairs() which is more versatile")
   list(
@@ -284,8 +284,8 @@ list_fastq <- function(path,
 #' @param ... further arguments for \code{\link[base]{list.files}}
 #' @return named list of sorted foreward and reverse filenames
 list_filepairs <- function(path,
-                       pattern_forward = "_R1_001.fastq",
-                       pattern_reverse = "_R2_001.fastq",
+                       pattern_forward = "^.*R1_001",
+                       pattern_reverse = "^.*R2_001",
                        glob = FALSE,
                        verify = TRUE,
                        ...){

@@ -6,8 +6,8 @@
 \usage{
 list_filepairs(
   path,
-  pattern_forward = "_R1_001.fastq",
-  pattern_reverse = "_R2_001.fastq",
+  pattern_forward = "^.*R1_001",
+  pattern_reverse = "^.*R2_001",
   glob = FALSE,
   verify = TRUE,
   ...

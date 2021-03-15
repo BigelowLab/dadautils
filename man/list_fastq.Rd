@@ -6,8 +6,8 @@
 \usage{
 list_fastq(
   path,
-  pattern_forward = "^.*_R1_001\\\\.fastq",
-  pattern_reverse = "^.*_R2_001\\\\.fastq"
+  pattern_forward = "^.*_R1_001",
+  pattern_reverse = "^.*_R2_001"
 )
 }
 \arguments{
