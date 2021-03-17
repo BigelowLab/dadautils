@@ -200,6 +200,34 @@ table_as_matrix <- function(x,
   return(m)
 }
 
+#' Generate a FASTA object from a vector of sequences
+#'
+#' @export
+#' @param x character vector or a sequence count matrix with named columns
+#' @param prefix character, by default 'ASV'
+#' @param sep character, by default "_"
+#' @param pad logical, if TRUE zero pad the ASV identifier count
+#' @param file character or NA.  If not NA then save to the file specified
+#' @return \code{Biostrings::BStringSet}
+asv_fasta <- function(x, prefix = "ASV", sep = "_", pad = TRUE,
+  file = NA){
+  if (inherits(x, 'matrix')) x <- colnames(x)
+  nx <- length(x)
+  id <- if (pad){
+    n <- nchar(length(x))
+    pattern <- paste0("%s%s%0.",n,"i")
+    sprintf(pattern, prefix[1], sep[1], seq_len(nx))
+  } else {
+    sprintf("%s%s%i", prefix[1], sep[1], seq_len(nx))
+  }
+  names(x) <- id
+  r <- Biostrings::BStringSet(x, use.names = TRUE)
+  if (!is.na(file)){
+    writeXStringSet(r, file[1], append=FALSE,
+                    compress=FALSE, compression_level=NA, format="fasta")
+  }
+  r
+}
 
 
 #' Convert an eDNA sequence counts table to a \code{dada2} friendly matrix

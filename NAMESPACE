@@ -3,6 +3,7 @@
 export(add_extension)
 export(all_orients)
 export(assign_taxonomy)
+export(asv_fasta)
 export(audit)
 export(autopopulate_config)
 export(count_cores)
