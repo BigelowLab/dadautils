@@ -240,15 +240,22 @@ add_extension <- function(
 #' @export
 #' @param x a list with file pairings as character vectors
 #' @param elements character, the names of the file pair elements to test
+#' @param require_reverse logical, if TRUE then insist that reverse files must be present (ala Illumina).
+#'   If FALSE (the default) then allow reverse files to be absent (ala PacBio)
 #' @return the input list
-verify_filepairs <- function(x, elements = c("forward", "reverse")){
+verify_filepairs <- function(x, elements = c("forward", "reverse"),
+  require_reverse = FALSE){
 
   if (!all((elements %in% names(x)))) stop("input is missing one or more required elements")
 
-  ll <- sapply(elements, function(e) length(x[[e]]))
+  ll <- lengths(x)
 
-  if (!all(ll %in% ll[1])) stop("elements of input must be the same length")
-
+  if (length(ll[2]) == 0){
+    if (require_reverse) stop("reverse elements are required")
+  } else {
+    if (!all(ll %in% ll[1])) stop("elements of input must be the same length")
+  }
+  
   x
 }
 
@@ -270,7 +277,10 @@ list_fastq <- function(path,
     reverse = sort(list.files(path, pattern = pattern_reverse, full.names = TRUE)) )
 }
 
-#' List files and separate into forward and reverse file lists based upon filenaming patterns
+#' List files and separate into forward and reverse file lists based upon filenaming patterns.
+#'
+#' If reverse files are not present (ala \code{PacBio}) then that element is set to a zero-length
+#' character element.
 #'
 #' @export
 #' @param path character, the input path
@@ -282,7 +292,7 @@ list_fastq <- function(path,
 #'        as provided by the user.
 #' @param verify logical, if TRUE test that the filepairs are the same length
 #' @param ... further arguments for \code{\link[base]{list.files}}
-#' @return named list of sorted foreward and reverse filenames
+#' @return named list of sorted foreward and reverse filenames (reverse possibly zero-length character)
 list_filepairs <- function(path,
                        pattern_forward = "^.*R1_001",
                        pattern_reverse = "^.*R2_001",
@@ -297,7 +307,9 @@ list_filepairs <- function(path,
 
   x <- list(
     forward = sort(list.files(path, pattern = pattern_forward, full.names = TRUE, ...)),
-    reverse = sort(list.files(path, pattern = pattern_reverse, full.names = TRUE, ...)) )
+    reverse = sort(list.files(path, pattern = pattern_reverse, full.names = TRUE, ...)) 
+  )
+  
 
   if (verify) x <- verify_filepairs(x)
 

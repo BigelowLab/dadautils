@@ -2,7 +2,7 @@
 % Please edit documentation in R/misc.R
 \name{list_filepairs}
 \alias{list_filepairs}
-\title{List files and separate into forward and reverse file lists based upon filenaming patterns}
+\title{List files and separate into forward and reverse file lists based upon filenaming patterns.}
 \usage{
 list_filepairs(
   path,
@@ -30,8 +30,9 @@ as provided by the user.}
 \item{...}{further arguments for \code{\link[base]{list.files}}}
 }
 \value{
-named list of sorted foreward and reverse filenames
+named list of sorted foreward and reverse filenames (reverse possibly zero-length character)
 }
 \description{
-List files and separate into forward and reverse file lists based upon filenaming patterns
+If reverse files are not present (ala \code{PacBio}) then that element is set to a zero-length
+character element.
 }

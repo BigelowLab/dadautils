@@ -16,7 +16,8 @@ run_dada(filelist, errs, multithread = count_cores(), ...)
 \item{...}{arguments for \code{\link[dada2]{dada}}}
 }
 \value{
-list with elements for forward and reverse as returned by \code{\link[dada2]{dada}}
+list with elements for forward and reverse as returned by \code{\link[dada2]{dada}}. 
+   The reverse element may be NULL
 }
 \description{
 Run dada

@@ -4,12 +4,19 @@
 \alias{verify_filepairs}
 \title{Verify that a list of file pairs is suitable for processing.}
 \usage{
-verify_filepairs(x, elements = c("forward", "reverse"))
+verify_filepairs(
+  x,
+  elements = c("forward", "reverse"),
+  require_reverse = FALSE
+)
 }
 \arguments{
 \item{x}{a list with file pairings as character vectors}
 
 \item{elements}{character, the names of the file pair elements to test}
+
+\item{require_reverse}{logical, if TRUE then insist that reverse files must be present (ala Illumina).
+If FALSE (the default) then allow reverse files to be absent (ala PacBio)}
 }
 \value{
 the input list

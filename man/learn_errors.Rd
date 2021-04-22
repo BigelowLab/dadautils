@@ -26,6 +26,10 @@ learn_errors(
 
 \item{...}{arguments for \code{\link[dada2]{learnErrors}}}
 }
+\value{
+list with elements for forward and reverse as returned by \code{\link[dada2]{learnErrors}}. 
+   The reverse element may be NULL.
+}
 \description{
 Run dada2::learnErrors on a set of fastq files
 }

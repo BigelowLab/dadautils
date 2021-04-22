@@ -16,16 +16,23 @@ filter_and_trim <- function(filelist,
                             ...){
 
   ffilt <- file.path(output_path, basename(filelist$forward))
-  rfilt <- file.path(output_path, basename(filelist$reverse))
-
+  
+  norev <- length(filelist$reverse) == 0
+  
+  rfilt <- if(norev){
+      NULL
+    } else {
+      file.path(output_path, basename(filelist$reverse))
+    }
+  
   if (compress){
     ffilt <- charlier::add_extension(ffilt, ext = ".gz", no_dup = TRUE)
-    rfilt <- charlier::add_extension(rfilt, ext = ".gz", no_dup = TRUE)
+    rfilt <- if(!norev) charlier::add_extension(rfilt, ext = ".gz", no_dup = TRUE)
   }
 
   x <- dada2::filterAndTrim(filelist$forward,
                             ffilt,
-                            rev = filelist$reverse,
+                            rev = if (norev) { NULL } else { filelist$reverse},
                             filt.rev = rfilt,
                             compress = compress,
                             multithread = multithread,
@@ -48,6 +55,8 @@ filter_and_trim <- function(filelist,
 #' @param output_path character, the output path
 #' @param save_output logical, if TRUE save the output to the specified output_path
 #' @param save_graphics logical, if TRUE try to capture quality plots form the resulting cut_files
+#' @return list with elements for forward and reverse as returned by \code{\link[dada2]{learnErrors}}. 
+#'    The reverse element may be NULL.
 learn_errors <- function(filelist,
   multithread = count_cores(),
   output_path = dirname(filelist$forward[1]),
@@ -55,9 +64,15 @@ learn_errors <- function(filelist,
   save_graphics = FALSE,
   ...){
 
+  norev <- length(filelist$reverse) == 0
+  
   errs <- list(
       forward =  dada2::learnErrors(filelist$forward, multithread = multithread, ...),
-      reverse =  dada2::learnErrors(filelist$reverse, multithread = multithread, ...)
+      reverse =  if (norev){
+                   NULL
+                 } else {
+                   dada2::learnErrors(filelist$reverse, multithread = multithread, ...)
+                 }
     )
 
   if (save_output){
@@ -67,12 +82,12 @@ learn_errors <- function(filelist,
   if (save_graphics){
     pforward <- dada2::plotErrors(errs$forward, nominalQ=TRUE) +
       ggplot2::ggtitle("Forward")
-    preverse <- dada2::plotErrors(errs$reverse, nominalQ=TRUE) +
-      ggplot2::ggtitle("Reverse")
+    if (!norev) preverse <- dada2::plotErrors(errs$reverse, nominalQ=TRUE) +
+                   ggplot2::ggtitle("Reverse")
     ofile <- file.path(output_path, "learn_errors.pdf")
     grDevices::pdf(ofile, height = 7.5, width = 10.5)
     try(
-      print(pforward + preverse)
+      if (!norev) {print(pforward + preverse)} else {print(pforward)}
     )
     grDevices::dev.off()
   }
@@ -88,18 +103,26 @@ learn_errors <- function(filelist,
 #' @param errs list of forward and reverse outputs of learnErrors
 #' @param multithread numeric, the number of cores to use. Defaults to \code{\link{count_cores}}
 #' @param ... arguments for \code{\link[dada2]{dada}}
-#' @return list with elements for forward and reverse as returned by \code{\link[dada2]{dada}}
+#' @return list with elements for forward and reverse as returned by \code{\link[dada2]{dada}}. 
+#'    The reverse element may be NULL
 run_dada <- function(filelist, errs,
   multithread = count_cores(),
   ...){
 
-
-  filelist <- lapply(filelist, dada2::derepFastq)
-
-  x <- list(
-    forward = dada2::dada(filelist$forward, errs$forward, multithread = multithread, ...),
-    reverse = dada2::dada(filelist$reverse, errs$reverse, multithread = multithread, ...)
-  )
+  norev <- length(filelist$reverse) == 0
+  if (norev){
+    filelist <- dada2::derepFastq(filelist$foreward)
+    x <- list(
+      forward = dada2::dada(filelist, errs$forward, multithread = multithread, ...),
+      reverse = NULL
+    )
+  } else {
+    filelist <- lapply(filelist, dada2::derepFastq)
+    x <- list(
+      forward = dada2::dada(filelist$forward, errs$forward, multithread = multithread, ...),
+      reverse = dada2::dada(filelist$reverse, errs$reverse, multithread = multithread, ...)
+    )
+  }
   x
 }
 
@@ -151,10 +174,11 @@ plot_qualityProfiles <- function(x,
   n = 2,
   ofile = "quality_profiles.pdf"){
 
+  norev <- length(x$reverse) == 0
   ix <- seq_len(n)
   pdf(ofile)
   print(dadautils::plot_qualityProfile(x$forward[ix]), filename = NA)
-  print(dadautils::plot_qualityProfile(x$reverse[ix]), filename = NA)
+  if (!norev) print(dadautils::plot_qualityProfile(x$reverse[ix]), filename = NA)
   dev.off()
 }
 
@@ -223,7 +247,7 @@ asv_fasta <- function(x, prefix = "ASV", sep = "_", pad = TRUE,
   names(x) <- id
   r <- Biostrings::BStringSet(x, use.names = TRUE)
   if (!is.na(file)){
-    writeXStringSet(r, file[1], append=FALSE,
+    Biostrings::writeXStringSet(r, file[1], append=FALSE,
                     compress=FALSE, compression_level=NA, format="fasta")
   }
   r
