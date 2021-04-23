@@ -155,10 +155,12 @@ count_cores <- function(){
 #'   the specified element name \code{name}
 #' @param rule character, the name of the rule to use
 #' @param element character, the name of the list element used to find filenames if \code{x} is a list
+#' @param custom_fun, a function to do custom extraction, ignored unless \code{rule} is "custom"
 #' @return character vector of sample names - one per input
 extract_sample_names <- function(x,
-  rule = "before first _",
-  element = "forward"){
+  rule = c("before first _","basename","custom")[1],
+  element = "forward",
+  custom_fun = NULL){
 
   if (is.list(x)){
     if (!(element[1] %in% names(x))){
@@ -168,7 +170,9 @@ extract_sample_names <- function(x,
   }
   sample_names = switch(rule[1],
       "before first _" = sapply(strsplit(basename(x), "_"), `[`, 1),
-      stop("rule not known - check with progammer to add a rule")
+      "basename" = basename(x),
+      "custom" = custom_fun(x),
+       stop("rule not known - check with progammer to add a rule")
     )
 
   sample_names

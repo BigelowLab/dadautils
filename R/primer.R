@@ -51,3 +51,57 @@ all_orients <- function(primer = "TTGAAAA-CTC-N")  {
              RevComp = Biostrings::reverseComplement(dna)) 
   return(sapply(orients, toString))
 } 
+
+#' Remove primers
+#'
+#' @export
+#' @param filelist list of forward and reverse fastq files
+#' @param output_path character, the output path
+#' @param compress logical, see \code{\link[dada2]{removePrimers}}
+#' @param ... other arguments for \code{\link[dada2]{removePrimers}}
+#' @param save_results logical, save CSV if TRUE
+#' @return two element list of tibbles see \code{\link[dada2]{removePrimers}}
+remove_primers <- function(filelist,
+                           output_path = file.path(dirname(filelist$forward[1]),'no_primers'),
+                           save_results = TRUE,
+                           compress = TRUE,
+                           ...){
+  
+  fprim <- file.path(output_path, basename(filelist$forward))
+  
+  norev <- length(filelist$reverse) == 0
+  
+  rprim <- if(norev){
+    NULL
+  } else {
+    file.path(output_path, basename(filelist$reverse))
+  }
+  
+  if (compress){
+    fprim <- charlier::add_extension(fprim, ext = ".gz", no_dup = TRUE)
+    rprim <- if(!norev) charlier::add_extension(rprim, ext = ".gz", no_dup = TRUE)
+  }
+  
+  x <- list(
+    forward = dada2::removePrimers(filelist$forward,
+                                   fprim,
+                                   compress = compress,
+                                   ...) %>% 
+              dplyr::as_tibble(rownames = "name"),
+    reverse = if (norev) {
+              NULL
+              } else {
+              dada2::removePrimers(filelist$reverse,
+                           rprim,
+                           compress = compress,
+                           ...) %>% 
+              dplyr::as_tibble(rownames = "name")
+              })
+    
+  
+  if (save_results) {
+    readr::write_csv(x$forward, file.path(output_path, "primer-results_forward.csv"))
+    if (!norev) readr::write_csv(x$reverse, file.path(output_path, "primer-results_reverse.csv"))
+  }
+  x
+}

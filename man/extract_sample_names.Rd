@@ -4,7 +4,12 @@
 \alias{extract_sample_names}
 \title{Extract sample names fromn a list of filenames}
 \usage{
-extract_sample_names(x, rule = "before first _", element = "forward")
+extract_sample_names(
+  x,
+  rule = c("before first _", "basename", "custom")[1],
+  element = "forward",
+  custom_fun = NULL
+)
 }
 \arguments{
 \item{x}{character, vector of one or more filenames.  This also could be a
@@ -14,6 +19,8 @@ the specified element name \code{name}}
 \item{rule}{character, the name of the rule to use}
 
 \item{element}{character, the name of the list element used to find filenames if \code{x} is a list}
+
+\item{custom_fun, }{a function to do custom extraction, ignored unless \code{rule} is "custom"}
 }
 \value{
 character vector of sample names - one per input
