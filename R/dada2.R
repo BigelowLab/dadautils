@@ -111,7 +111,7 @@ run_dada <- function(filelist, errs,
 
   norev <- length(filelist$reverse) == 0
   if (norev){
-    filelist <- dada2::derepFastq(filelist$foreward)
+    filelist <- dada2::derepFastq(filelist$forward)
     x <- list(
       forward = dada2::dada(filelist, errs$forward, multithread = multithread, ...),
       reverse = NULL
