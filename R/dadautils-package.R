@@ -9,6 +9,7 @@
 #' @importFrom dplyr %>%
 #' @importFrom grDevices dev.off pdf
 #' @importFrom utils installed.packages write.csv
+#' @importFrom stats setNames
 NULL
 
 #' Deprecated functions in dadautils

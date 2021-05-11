@@ -40,7 +40,24 @@ quality_profile_data <- function(
     aggregate <- FALSE
   }
   
+  # retrieve quantile (xx value) where yy quantile is at or above q
   get_quant <- function(xx, yy, q) { xx[which(cumsum(yy)/sum(yy) >= q)][[1]] }
+  
+  # retrieve list of Cycle, Q25, Q50, Q75, Cum, Mean per Cycle-group data.frame
+  # this replaces the get_quant and repeated by() statements which are awesome and fast
+  # but also require repeated computation of the same vectors (sumsum, y, sum)
+  # so this reduces that load.  There is a tradeoff as we construct a (named) list each for 
+  # each Cycle, but the ease of programmatic structures seems like a nice trade
+  get_quants <- function(x, key, qs = c(0.25, 0.50, 0.75)) { 
+    cumsumx <- cumsum(x$Count)
+    sumx <- cumsumx[length(cumsumx)]
+    y <- cumsumx/sumx
+    ix <- sapply(qs, function(qs) which(y >= qs)[1])
+    #cum <- sum(x$Count)
+    meen <- sum(x$Score * x$Count)/sumx
+    as.list(c(key$Cycle, x$Score[ix], sumx, meen)) %>%
+      setNames(c("Cycle", sprintf("Q%i", qs*100), "Cum", "Mean"))
+  }
   
   # compute per file
   xx <- lapply(fl,
@@ -54,37 +71,53 @@ quality_profile_data <- function(
       } else {
         rclabel <- paste("Reads: ", rc)
       }
-      # Calculate summary statistics at each position
-      means <- rowsum(df$Score*df$Count, df$Cycle)/rowsum(df$Count, df$Cycle)    
-      q25s <- by(df, df$Cycle, function(foo) get_quant(foo$Score, foo$Count, 0.25), simplify=TRUE)
-      q50s <- by(df, df$Cycle, function(foo) get_quant(foo$Score, foo$Count, 0.5), simplify=TRUE)
-      q75s <- by(df, df$Cycle, function(foo) get_quant(foo$Score, foo$Count, 0.75), simplify=TRUE)
-      cums <- by(df, df$Cycle, function(foo) sum(foo$Count), simplify=TRUE)
-      if(!all(sapply(list(names(q25s),
-                          names(q50s),
-                          names(q75s),
-                          names(cums)),
-                          identical,
-                          rownames(means)))) {
-          stop("Calculated quantiles/means weren't compatible.")
-        }
+      
+      # Calculate summary statistics at each Cycle
+      if (FALSE){
+        statdf <- df %>%
+          dplyr::group_by(.data$Cycle) %>%
+          dplyr::group_map(get_quants, .keep = TRUE) %>%
+          dplyr::bind_rows() %>%
+          dplyr::mutate(file = basename(f))
+        if (!all(unique(df$Cycle)) %in% qs$Cycle)
+          stop("One or more Cycles failed to generate quantiles, means and cums")
+        #plotdf <- df %>%
+        #  dplyr::mutate(file = basename(f))
+      } else {
+        means <- rowsum(df$Score*df$Count, df$Cycle)/rowsum(df$Count, df$Cycle)  
+        cums <- by(df, df$Cycle, function(foo) sum(foo$Count), simplify=TRUE)  
+        q25s <- by(df, df$Cycle, function(foo) get_quant(foo$Score, foo$Count, 0.25), simplify=TRUE)
+        q50s <- by(df, df$Cycle, function(foo) get_quant(foo$Score, foo$Count, 0.5), simplify=TRUE)
+        q75s <- by(df, df$Cycle, function(foo) get_quant(foo$Score, foo$Count, 0.75), simplify=TRUE)
+        if(!all(sapply(list(names(q25s),
+                            names(q50s),
+                            names(q75s),
+                            names(cums)),
+                            identical,
+                            rownames(means)))) {
+            stop("Calculated quantiles/means weren't compatible.")
+          }
+        #plotdf <- cbind(df, file=basename(f))
+        statdf <- dplyr::tibble(
+            Cycle=as.integer(rownames(means)),
+            Mean=means[,1],
+            Q25=as.vector(q25s),
+            Q50=as.vector(q50s),
+            Q75=as.vector(q75s),
+            Cum=10*as.vector(cums)/rc,
+            file=basename(f))
+      } # development block
+      
       plotdf <- df %>%
         dplyr::mutate(file = basename(f))
-      statdf <- dplyr::tibble(
-          Cycle=as.integer(rownames(means)),
-          Mean=means[,1],
-          Q25=as.vector(q25s),
-          Q50=as.vector(q50s),
-          Q75=as.vector(q75s),
-          Cum=10*as.vector(cums)/rc,
-          file=basename(f))
-    
+
       anndf <- dplyr::tibble(
           minScore=min(df$Score),
           label=basename(f),
           rclabel=rclabel,
           rc=rc,
           file=basename(f))
+      
       list(plotdf = plotdf, statdf = statdf, anndf = anndf)
     }) # lapply through fl 
 
@@ -140,13 +173,12 @@ quality_profile_data <- function(
 #'   files <- c(system.file("extdata", "sam1F.fastq.gz", package="dada2"),
 #'              system.file("extdata", "sam1R.fastq.gz", package="dada2"))
 #'   result <- quality_profile_data(files)
-#'   result_and_plot <- draw_quality_profile(result)
+#'   result_and_plot <- quality_profile_drawing(result)
 #'   print(result$plot)
 #'  }
-draw_quality_profile <- function(x = quality_profile_data()){
+quality_profile_drawing <- function(x = quality_profile_data()){
   
   if (x$opts$aggregate) {
-    	
       p <- ggplot2::ggplot(data=x$plotdf.summary, ggplot2::aes(x=.data$Cycle, y=.data$Score)) +
         ggplot2::geom_tile(ggplot2::aes(fill=.data$Count)) +
   		  ggplot2::scale_fill_gradient(low="#F5F5F5", high="black") +
@@ -181,9 +213,11 @@ draw_quality_profile <- function(x = quality_profile_data()){
     	  ggplot2::geom_tile(ggplot2::aes(fill=.data$Count)) +
   		  ggplot2::scale_fill_gradient(low="#F5F5F5", high="black") +
   		  ggplot2::geom_line(data=x$statdf, ggplot2::aes(y=.data$Mean), color="#66C2A5") +
+        ggplot2::geom_smooth(data=x$statdf, ggplot2::aes(y=.data$Mean), 
+                             method = lm, formula = y ~ poly(x, 2), se = TRUE) + 
   		  ggplot2::geom_line(data=x$statdf, ggplot2::aes(y=.data$Q25), color="#FC8D62", size=0.25,
   		    linetype="dashed") +
-  		  ggplot2::geom_line(data=x$statdf, ggplot2::aes(y=.data$Q50), color="#FC8D62", size=0.25) +
+  		  ggplot2::geom_line(data=x$statdf, ggplot2::aes(y=.data$Q50), color="#66C2A5", size=0.25) +
         ggplot2::geom_line(data=x$statdf, ggplot2::aes(y=.data$Q75), color="#FC8D62", size=0.25,
           linetype="dashed") +
         ggplot2::ylab("Quality Score") +
@@ -253,7 +287,7 @@ quality_profile <- function(
   }
  
  quality_profile_data(fl, n = n, aggregate = aggregate) %>%
-   draw_quality_profile()
+   quality_profile_drawing()
 }
 
 
