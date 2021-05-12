@@ -4,16 +4,15 @@ library(ggplot2)
 library(charlier)
 library(dadautils)
 library(ShortRead)
-quality_profile_data
-x <- quality_profile_data()
+
 
 # dashed orange = Q75
 # solid orange = Q50
 # dashed orange = Q75
 # solid green th-ck = mean
 
-n = 500000
-f <- system.file("extdata", "sam1F.fastq.gz", package="dada2")
-srqa <- ShortRead::qa(f, n = n)
+PATH <- "/mnt/storage/data/edna/dada/projects/ben_foo/weeds-workshop"
+files <- list_filepairs(file.path(PATH, "cutadapt"))
 
-x <- quality_profile_data()
+xx <- lapply(files, quality_profile_data)
+x <- xx[[1]]
