@@ -5,14 +5,15 @@
 \title{Compute quality profiles for one or more FastQ files.}
 \usage{
 quality_profile(
-  fl = c(system.file("extdata", "sam1F.fastq.gz", package = "dada2"),
+  x = c(system.file("extdata", "sam1F.fastq.gz", package = "dada2"),
     system.file("extdata", "sam1R.fastq.gz", package = "dada2")),
   n = 5e+05,
-  aggregate = FALSE
+  aggregate = FALSE,
+  ...
 )
 }
 \arguments{
-\item{fl}{(Required). \code{character}.
+\item{x}{(Required). \code{character}.
 File path(s) to fastq or fastq.gz file(s).}
 
 \item{n}{(Optional). Default 500,000.
@@ -20,6 +21,8 @@ The number of records to sample from the fastq file.}
 
 \item{aggregate}{(Optional). Default FALSE.
 If TRUE, compute an aggregate quality profile for all fastq files provided.}
+
+\item{...}{arguments for \code{\link{quality_profile_cutoff}}}
 }
 \value{
 as list with the following elements

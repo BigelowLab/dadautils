@@ -5,11 +5,11 @@
 #' @param method character the threshold method to use - just "ruler" method now
 #' @param params list (or NULL) of parameters needed to implement the specified method 
 #' @param form character either "full" or "reduced".  If reduce return just the threshold row.
-#' @return a tibble of 
+#' @return the input list with an added cutoff tibble of 
 #' \itemize{
-#' \item{Cycle the predicted Cycle value}
+#'  \item{Cycle the predicted Cycle value - the computed cutoff}
 #'  \item{Score the fitted Score value}
-#'  \item{cutoff the Cycle cutoff value}
+#'  \item{overlap the expected overlap at the cutoff (forward cutoff len + )}
 #'  \item{model the model as a list column (for example an lm model)}
 #'  \item{file the name of the file}
 #'  }
@@ -22,12 +22,16 @@
 #'  }
 quality_profile_cutoff <- function(x = quality_profile_data(),
   method = "ruler",
-  params = list(Score = 25),
+  params = list(Score = 25, formula = stats::as.formula("Mean ~ poly(Cycle, 2)")),
   form = c("full", "reduced")[2]){
    
+    r <- NULL
     if (tolower(method[1]) == "ruler"){
-      fit_ruler <- function(x1, key, threshold = 25, form = "reduced"){
-        f <- lm(Mean ~ poly(Cycle, 2), data = x1)
+      fit_ruler <- function(x1, key, 
+                            threshold = 25, 
+                            formula = stats::as.formula("Mean ~ poly(Cycle, 2)"),
+                            form = "reduced"){
+        f <- lm(formula, data = x1)
         p <- predict(f) %>% 
           dplyr::as_tibble(rownames = "Cycle") %>%
           dplyr::mutate(Cycle = as.numeric(.data$Cycle)) %>%
@@ -35,8 +39,7 @@ quality_profile_cutoff <- function(x = quality_profile_data(),
         ix <- which(findInterval(p$Score, threshold) > 0)
         ix <- ix[length(ix)]
         p <- p %>%  
-          dplyr::mutate(cutoff = .data$Cycle[ix],
-                        model = list(f), 
+          dplyr::mutate(model = list(f), 
                         file = x1$file)
         if (tolower(form[1]) == "reduced"){
           p <- p %>%
@@ -49,12 +52,16 @@ quality_profile_cutoff <- function(x = quality_profile_data(),
       # evaluate at params$Score
       r <- x$statdf %>%
         dplyr::group_by(.data$file) %>%
-        dplyr::group_map(fit_ruler, .keep = TRUE, threshold = params$Score, form = form) %>%
+        dplyr::group_map(fit_ruler, .keep = TRUE, 
+                         threshold = params$Score,
+                         formula = params$formula,
+                         form = form) %>%
         dplyr::bind_rows()
     } else {
       stop("method not known:", method[1])
     }
-    r
+    x[['cutoff']] <- r
+    x
  }
 
 
@@ -312,12 +319,13 @@ quality_profile_drawing <- function(x = quality_profile_data()){
 #'
 #' @export
 #' @seealso \code{\link[dada2]{plotQualityProfile}}
-#' @param fl (Required). \code{character}.
+#' @param x (Required). \code{character}.
 #'        File path(s) to fastq or fastq.gz file(s).
 #' @param n (Optional). Default 500,000.
 #'        The number of records to sample from the fastq file.
 #' @param aggregate (Optional). Default FALSE.
 #'        If TRUE, compute an aggregate quality profile for all fastq files provided.
+#' @param ... arguments for \code{\link{quality_profile_cutoff}}
 #' @return as list with the following elements
 #' \itemize{
 #'   \item{files character vector of input filenames}
@@ -334,18 +342,70 @@ quality_profile_drawing <- function(x = quality_profile_data()){
 #'   print(result$plot)
 #'  }
 quality_profile <- function(
-  fl = c(system.file("extdata", "sam1F.fastq.gz", package="dada2"),
+  x = c(system.file("extdata", "sam1F.fastq.gz", package="dada2"),
          system.file("extdata", "sam1R.fastq.gz", package="dada2")), 
   n = 500000, 
-  aggregate = FALSE){
+  aggregate = FALSE, 
+  ...){
   
   if (FALSE){
-    fl <- c(system.file("extdata", "sam1F.fastq.gz", package="dada2"),
+    x <- c(system.file("extdata", "sam1F.fastq.gz", package="dada2"),
             system.file("extdata", "sam1R.fastq.gz", package="dada2"))
     n <- 500000
     aggregate <- FALSE
   }
  
- quality_profile_data(fl, n = n, aggregate = aggregate) %>%
+ quality_profile_data(x, n = n, aggregate = aggregate) %>%
+   quality_profile_cutoff(...) %>%
    quality_profile_drawing()
+}
+
+#' Compute pairwise (forward-reverse) quality profiles
+#'
+#' This a thin wrapper around \code{\link[dada2]{plotQualityProfile}} but produces a list
+#' that includes tables of ancillary statistics in addition to a printable plot object.
+#'
+#' @export
+#' @seealso \code{\link[dada2]{plotQualityProfile}}
+#' @param filelist list of forward and reverse fastq files
+#' @param n (Optional). Default 500,000.
+#'        The number of records to sample from the fastq file.
+#' @param aggregate (Optional). Default FALSE.
+#'        If TRUE, compute an aggregate quality profile for all fastq files provided.
+#' @param amplicon_length numeric, the expected amplicon length, used to compute expected overlap
+#' @param ... arguments for \code{\link{quality_profile_cutoff}}
+quality_profile_pairs <- function(
+  filelist = list(
+    forward = c(system.file("extdata", "sam1F.fastq.gz", package="dada2"),
+                system.file("extdata", "sam2F.fastq.gz", package="dada2")),
+    reverse = c(system.file("extdata", "sam1R.fastq.gz", package="dada2"),
+                system.file("extdata", "sam2R.fastq.gz", package="dada2"))),
+  n = 500000, 
+  aggregate = FALSE, 
+  amplicon_length = 400,
+  ...){
+
+  if (FALSE){
+    filelist = list(
+      forward = c(system.file("extdata", "sam1F.fastq.gz", package="dada2"),
+                  system.file("extdata", "sam2F.fastq.gz", package="dada2")),
+      reverse = c(system.file("extdata", "sam1R.fastq.gz", package="dada2"),
+                  system.file("extdata", "sam2R.fastq.gz", package="dada2")))
+    n = 500000
+    aggregate = FALSE
+    amplicon_length = 400
+    xx <- lapply(filelist, quality_profile, n = n, aggregate = aggregate)
+  }
+    xx <- lapply(filelist, quality_profile, n = n, aggregate = aggregate, ...)
+    
+    overlap <- function(f = 250, r = 189, a = 400){f - (a-r)}
+    
+    xx[['overlap']] <- lapply(names(xx), 
+      function(n){
+        x <- xx[[n]]$cutoff
+        setNames(x, paste0(substring(n, 1, 1), names(x)))
+        }) %>%
+        dplyr::bind_cols() %>%
+        dplyr::mutate(overlap = overlap(f = .data$fCycle, r = .data$rCycle, a = amplicon_length))
+    invisible(xx)
 }

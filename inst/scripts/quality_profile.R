@@ -2,7 +2,8 @@ library(rlang)
 library(dplyr)
 library(ggplot2)
 library(charlier)
-library(dadautils)
+#library(dadautils)
+devtools::load_all()
 library(ShortRead)
 
 
@@ -14,5 +15,13 @@ library(ShortRead)
 PATH <- "/mnt/storage/data/edna/dada/projects/ben_foo/weeds-workshop"
 files <- list_filepairs(file.path(PATH, "cutadapt"))
 
-xx <- lapply(files, quality_profile_data)
+xx <- lapply(files, quality_profile)
 x <- xx[[1]]
+
+
+
+sp <- SolexaPath(system.file('extdata', package='ShortRead'))
+rfq <- readFastq(analysisPath(sp), pattern="s_1_sequence.txt")
+sread(rfq)
+id(rfq)
+quality(rfq)

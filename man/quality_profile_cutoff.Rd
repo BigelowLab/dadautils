@@ -7,7 +7,7 @@
 quality_profile_cutoff(
   x = quality_profile_data(),
   method = "ruler",
-  params = list(Score = 25),
+  params = list(Score = 25, formula = stats::as.formula("Mean ~ poly(Cycle, 2)")),
   form = c("full", "reduced")[2]
 )
 }
@@ -21,11 +21,11 @@ quality_profile_cutoff(
 \item{form}{character either "full" or "reduced".  If reduce return just the threshold row.}
 }
 \value{
-a tibble of 
+the input list with an added cutoff tibble of 
 \itemize{
-\item{Cycle the predicted Cycle value}
+ \item{Cycle the predicted Cycle value - the computed cutoff}
  \item{Score the fitted Score value}
- \item{cutoff the Cycle cutoff value}
+ \item{overlap the expected overlap at the cutoff (forward cutoff len + )}
  \item{model the model as a list column (for example an lm model)}
  \item{file the name of the file}
  }
