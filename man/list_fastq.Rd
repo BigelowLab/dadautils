@@ -18,7 +18,7 @@ list_fastq(
 \item{pattern_reverse}{file pattern}
 }
 \value{
-named list of sorted foreward and reverse fastq filenames
+named list of sorted forward and reverse fastq filenames
 }
 \description{
 List fastq files and separate into forward and reverse reads
