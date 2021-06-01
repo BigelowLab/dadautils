@@ -7,10 +7,7 @@
 expected_error(x)
 }
 \arguments{
-\item{x}{numeric vector}
-
-\item{method}{charcater by default 'filtAndTrim' from \code{\link[dada2]{filterAndTrim}} description of 
-\code{maxEE}}
+\item{x}{numeric vector such as from \code{\link[ShortRead]{alphabetScore}}}
 }
 \value{
 numeric expected error

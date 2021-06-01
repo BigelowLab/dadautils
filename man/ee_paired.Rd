@@ -4,7 +4,7 @@
 \alias{ee_paired}
 \title{Compute expected errors for \code{\link[ShortRead]{alphabetScore}} vectors}
 \usage{
-ee_paired(x = score_pair())
+ee_paired(x = score_paired())
 }
 \arguments{
 \item{x}{named list of quality score vectors as returned by \code{\link[ShortRead]{alphabetScore}}}

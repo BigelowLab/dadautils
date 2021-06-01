@@ -85,7 +85,8 @@ example_filepairs  <- function(){
 read_fastq_paired <- function(filelist = example_filepairs()){
   sapply(filelist,
       function(x){
-        lapply(x, ShortRead::readFastq)
+        lapply(x, ShortRead::readFastq) %>%
+          setNames(basename(x))
       }, simplify = FALSE)
 }
 
@@ -96,10 +97,10 @@ read_fastq_paired <- function(filelist = example_filepairs()){
 #' @export
 #' @param x named list of sorted forward and reverse \code{\link[ShortRead]{ShortReadQ}} objects 
 #' @return named list of quality score vectors as returned by \code{\link[ShortRead]{alphabetScore}}
-score_paired <- function(x = read_fastq_paired()){s
+score_paired <- function(x = read_fastq_paired()){
   sapply(x,
     function(x){
-      sapply(x, ShortRead::alphabetScore)
+      sapply(x, ShortRead::alphabetScore, simplify = FALSE)
     }, simplify = FALSE)
 }
 
@@ -107,9 +108,7 @@ score_paired <- function(x = read_fastq_paired()){s
 #'
 #' @seealso \code{\link[dada2]{filterAndTrim}}
 #' @export
-#' @param x numeric vector
-#' @param method charcater by default 'filtAndTrim' from \code{\link[dada2]{filterAndTrim}} description of 
-#'   \code{maxEE}
+#' @param x numeric vector such as from \code{\link[ShortRead]{alphabetScore}}
 #' @return numeric expected error 
 expected_error <- function(x){
   sum(10^(-x/10))
@@ -122,9 +121,34 @@ expected_error <- function(x){
 #' @export
 #' @param x named list of quality score vectors as returned by \code{\link[ShortRead]{alphabetScore}}
 #' @return named list expected errors
-ee_paired <- function(x = score_pair()){
+ee_paired <- function(x = score_paired()){
   sapply(x,
     function(x){
       sapply(x, expected_error)
     }, simplify = FALSE)
 }    
+
+#' Prepare a summary of expected errors
+#'
+#' @export
+#' @param filelist named list of sorted forward and reverse filenames
+#' @return named list of expected error vectors (one for forward, one for reverse)
+#' @examples 
+#' \dontrun{
+#'  example_filepairs() %>%
+#'    expected_error_paired()
+#'
+#'  # $forward
+#'  # sam1F.fastq.gz sam2F.fastq.gz 
+#'  #              0              0 
+#'  # 
+#'  # $reverse
+#'  # sam1R.fastq.gz sam2R.fastq.gz 
+#'                 0              0                
+#' }
+expected_error_paired <- function(filelist = example_filepairs()){
+  filelist %>%
+    read_fastq_paired() %>%
+    score_paired() %>%
+    ee_paired()
+}
