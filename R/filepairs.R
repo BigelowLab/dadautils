@@ -96,59 +96,134 @@ read_fastq_paired <- function(filelist = example_filepairs()){
 #'
 #' @export
 #' @param x named list of sorted forward and reverse \code{\link[ShortRead]{ShortReadQ}} objects 
-#' @return named list of quality score vectors as returned by \code{\link[ShortRead]{alphabetScore}}
-score_paired <- function(x = read_fastq_paired()){
+#' @param fun the function to score by  either \code{ShortRead::alphabetScore} or \code{ShortRead::alphabetByCycle}
+#' @return named list of quality score vectors as returned by \code{\link[ShortRead]{alphabetScore}} OR
+#'  named list of quality score arrays as returned by \code{\link[ShortRead]{alphabetByCycle}} OR
+score_paired <- function(x = read_fastq_paired(),
+  fun = ShortRead::alphabetScore){
   sapply(x,
     function(x){
-      sapply(x, ShortRead::alphabetScore, simplify = FALSE)
+      # sapply(x, ShortRead::alphabetScore, simplify = FALSE)
+      # sapply(x, ShortRead::alphabetByCycle, simplify = FALSE)
+      sapply(x, fun, simplify = FALSE)
     }, simplify = FALSE)
 }
 
-#' Compute expected errors from a vector - presumably \code{\link[ShortRead]{alphabetScore}} vector
-#'
-#' @seealso \code{\link[dada2]{filterAndTrim}}
-#' @export
-#' @param x numeric vector such as from \code{\link[ShortRead]{alphabetScore}}
-#' @return numeric expected error 
-expected_error <- function(x){
-  sum(10^(-x/10))
-}
 
-#' Compute expected errors for \code{\link[ShortRead]{alphabetScore}} vectors
-#'
-#' @seealso \code{\link[dada2]{filterAndTrim}}
-#'
+
+#' Compute quality scores using \code{\link[Rsubread]{qualityScores}}
+#' 
 #' @export
-#' @param x named list of quality score vectors as returned by \code{\link[ShortRead]{alphabetScore}}
-#' @return named list expected errors
-ee_paired <- function(x = score_paired()){
-  sapply(x,
-    function(x){
-      sapply(x, expected_error)
+#' @param filelist a paired list forward/reverse filenames
+#' @param nreads numeric, see \code{\link[Rsubread]{qualityScores}}
+#' @param ... other arguments for \code{\link[Rsubread]{qualityScores}}
+#' @return a paired list of quality score matrices
+paired_quality_scores <- function(filelist = example_filepairs(), nreads = -1, ...) {
+  sapply(filelist,
+    function(files){
+      lapply(files, 
+        function(file) {
+          suppressMessages(Rsubread::qualityScores(file, nreads = nreads, ...))
+        }) %>%
+        stats::setNames(basename(files))
     }, simplify = FALSE)
-}    
+}
 
-#' Prepare a summary of expected errors
+#' Compute EE per read for \code{\link[Rsubread]{qualityScores}}
 #'
 #' @export
-#' @param filelist named list of sorted forward and reverse filenames
-#' @return named list of expected error vectors (one for forward, one for reverse)
-#' @examples 
-#' \dontrun{
-#'  example_filepairs() %>%
-#'    expected_error_paired()
-#'
-#'  # $forward
-#'  # sam1F.fastq.gz sam2F.fastq.gz 
-#'  #              0              0 
-#'  # 
-#'  # $reverse
-#'  # sam1R.fastq.gz sam2R.fastq.gz 
-#'                 0              0                
-#' }
-expected_error_paired <- function(filelist = example_filepairs()){
-  filelist %>%
-    read_fastq_paired() %>%
-    score_paired() %>%
-    ee_paired()
+#' @param x paired list of quality scores as per \code{quality_scores}
+#' @param fun the function to use for summary (by default sum)
+#' @param na.rm logical, if TRUE then remove NAs before computing \code{fun}
+#' @return paried list of numeric vectors with quality per read
+paired_ee_per_read <- function(x = paired_quality_scores(),
+  fun = sum, na.rm = TRUE){
+  
+  sapply(x,
+    function(scores_dir){
+      lapply(scores_dir,
+        function(s){
+          ee <- 10^(-s/10)
+          apply(ee, 1, fun, na.rm = na.rm)
+        })
+    }
+    ,simplify = FALSE)
 }
+
+#' Threshold paired expected error computations
+#' 
+#' @export
+#' @param x paried list of expected errors - see \code{paired_ee_per_read}
+#' @param thresholds numeric vector of one or more thresholds
+#' @param op the comparative operator to use for the thrrsholding process (backquoted)
+#' @return a two element list of tibbles with threshold counts of errors-per-read above the threshold
+paired_ee_threshold <- function(x = paired_ee_per_read(),
+  thresholds = c(1,2,3,4,5),
+  op = `<=`){
+  # sapply(ee, function(ee) sapply(ee, function(e) sum(e <= 2)), simplify = F)
+  sapply(x,
+    function(xx){
+      sapply(xx,
+        function(e){
+          sapply(thresholds,
+            function(thresh) sum(op(e,thresh)) , simplify = FALSE) %>%
+            setNames(paste("t", thresholds, sep = "_")) %>%
+            dplyr::as_tibble()
+        }, simplify = FALSE) %>%
+        dplyr::bind_rows() %>%
+        dplyr::mutate(file = names(xx)) %>%
+        dplyr::relocate(file, .before = 1)
+    }, simplify = FALSE)
+}
+
+
+
+
+# #' Compute expected errors from a vector - presumably \code{\link[ShortRead]{alphabetScore}} vector
+# #'
+# #' @seealso \code{\link[dada2]{filterAndTrim}}
+# #' @export
+# #' @param x numeric vector such as from \code{\link[ShortRead]{alphabetScore}}
+# #' @return numeric expected error 
+# expected_error <- function(x){
+#   sum(10^(-x/10))
+# }
+# 
+# #' Compute expected errors for \code{\link[ShortRead]{alphabetScore}} vectors
+# #'
+# #' @seealso \code{\link[dada2]{filterAndTrim}}
+# #'
+# #' @export
+# #' @param x named list of quality score vectors as returned by \code{\link[ShortRead]{alphabetScore}}
+# #' @return named list expected errors
+# ee_paired <- function(x = score_paired()){
+#   sapply(x,
+#     function(x){
+#       sapply(x, expected_error)
+#     }, simplify = FALSE)
+# }    
+# 
+# #' Prepare a summary of expected errors
+# #'
+# #' @export
+# #' @param filelist named list of sorted forward and reverse filenames
+# #' @return named list of expected error vectors (one for forward, one for reverse)
+# #' @examples 
+# #' \dontrun{
+# #'  example_filepairs() %>%
+# #'    expected_error_paired()
+# #'
+# #'  # $forward
+# #'  # sam1F.fastq.gz sam2F.fastq.gz 
+# #'  #              0              0 
+# #'  # 
+# #'  # $reverse
+# #'  # sam1R.fastq.gz sam2R.fastq.gz 
+# #'                 0              0                
+# #' }
+# expected_error_paired <- function(filelist = example_filepairs()){
+#   filelist %>%
+#     read_fastq_paired() %>%
+#     score_paired() %>%
+#     ee_paired()
+# }

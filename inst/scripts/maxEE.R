@@ -5,12 +5,22 @@ library(charlier)
 #library(dadautils)
 devtools::load_all()
 library(ShortRead)
+library(Rsubread)
 
-PATH <- "/mnt/storage/data/edna/dada/projects/ben_foo/weeds-workshop"
-files <- list_filepairs(file.path(PATH, "cutadapt"))
+#PATH <- "/mnt/storage/data/edna/dada/projects/ben_foo/weeds-workshop"
+#files <- list_filepairs(file.path(PATH, "cutadapt"))
 
+PATH <- "/mnt/storage/data/edna/dada/projects/robin_foo/cyanos/cutadapt/lowquality"
+files <- list_filepairs(PATH)
+ee = expected_error_paired(files)
 
-    
+  
+quality_scores <- function(filelist = example_filepairs(), nreads = -1, ...) {
+  sapply(filelist,
+    function(files){
+      lapply(files, Rsubread::qualityScores, nreads = nreads, ...)
+    }, simplify = FALSE)
+}
 
 
 #' Build a table of expected error info for paired files
