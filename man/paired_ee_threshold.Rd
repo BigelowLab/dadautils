@@ -11,7 +11,7 @@ paired_ee_threshold(
 )
 }
 \arguments{
-\item{x}{paried list of expected errors - see \code{paired_ee_per_read}}
+\item{x}{paried list of expected errors - see \code{paired_ee_per_read} (one or both may be empty)}
 
 \item{thresholds}{numeric vector of one or more thresholds}
 
@@ -19,6 +19,7 @@ paired_ee_threshold(
 }
 \value{
 a two element list of tibbles with threshold counts of errors-per-read above the threshold
+  or NULL where the input is empty
 }
 \description{
 Threshold paired expected error computations

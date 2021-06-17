@@ -7,13 +7,14 @@
 score_paired(x = read_fastq_paired(), fun = ShortRead::alphabetScore)
 }
 \arguments{
-\item{x}{named list of sorted forward and reverse \code{\link[ShortRead]{ShortReadQ}} objects}
+\item{x}{named list of sorted forward and reverse \code{\link[ShortRead]{ShortReadQ}} objects (one or both maybe empty)}
 
 \item{fun}{the function to score by  either \code{ShortRead::alphabetScore} or \code{ShortRead::alphabetByCycle}}
 }
 \value{
 named list of quality score vectors as returned by \code{\link[ShortRead]{alphabetScore}} OR
  named list of quality score arrays as returned by \code{\link[ShortRead]{alphabetByCycle}} OR
+ named list of empty elements where input obects may be empty
 }
 \description{
 Compute scores for \code{\link[ShortRead]{ShortReadQ}} objects listing

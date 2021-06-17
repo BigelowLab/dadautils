@@ -2,7 +2,7 @@
 % Please edit documentation in R/filepairs.R
 \name{paired_ee_per_read}
 \alias{paired_ee_per_read}
-\title{Compute EE per read for \code{\link[Rsubread]{qualityScores}}}
+\title{Compute EE per read for \code{\link[Rsubread]{qualityScores}} (one or both may be empty)}
 \usage{
 paired_ee_per_read(x = paired_quality_scores(), fun = sum, na.rm = TRUE)
 }
@@ -14,8 +14,8 @@ paired_ee_per_read(x = paired_quality_scores(), fun = sum, na.rm = TRUE)
 \item{na.rm}{logical, if TRUE then remove NAs before computing \code{fun}}
 }
 \value{
-paried list of numeric vectors with quality per read
+paried list of numeric vectors with quality per read or NULL where inputs are empty
 }
 \description{
-Compute EE per read for \code{\link[Rsubread]{qualityScores}}
+Compute EE per read for \code{\link[Rsubread]{qualityScores}} (one or both may be empty)
 }

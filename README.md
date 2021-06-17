@@ -4,17 +4,25 @@ Provides utility functions for working with [dada2](https://benjjneb.github.io/d
 
 ### Requirements
 
-+ [R v3.6+](https://www.r-project.org/)
++ [R v4+](https://www.r-project.org/)
 
 + [rlang](https://CRAN.R-project.org/package=rlang)
 
-+ [dplyr](https://CRAN.R-project.org/package=dplyrg)
++ [dplyr](https://CRAN.R-project.org/package=dplyr)
+
++ [tidyselect](https://CRAN.R-project.org/package=tidyselect)
+
++ [stringr](https://CRAN.R-project.org/package=stringr)
 
 + [readr](https://CRAN.R-project.org/package=readr)
 
 + [yaml](https://CRAN.R-project.org/package=yaml)
 
 + [dada2](https://CRAN.R-project.org/package=dada2)
+
++ [phyloseq](https://bioconductor.org/packages/release/bioc/html/phyloseq.html)
+
++ [Rsubread](https://bioconductor.org/packages/release/bioc/html/Rsubread.html)
 
 + [Biostrings](https://bioconductor.org/packages/release/bioc/html/Biostrings.html)
 
@@ -25,11 +33,13 @@ Provides utility functions for working with [dada2](https://benjjneb.github.io/d
 + [patchwork](https://CRAN.R-project.org/package=patchwork)
 
 + [ggplot2](https://CRAN.R-project.org/package=ggplot2)
+
+ +[charlier](https://github.com/BigelowLab/charlier)
 	
 
 ### Note
 
-All of the requirements are preinstalled in the charlie module `dada2`.  If you are **not** operating within that module then installation of the above (and dependencies) is required.
+All of the requirements are preinstalled in the charlie module `dada2`.  If you are **not** operating within that module then installation of the above (including dependencies) is required.
 
 ### Note
 
@@ -110,50 +120,9 @@ edna_path("foo", "bar.csv", root = "/home/btupper")
 # [1] "/home/btupper/foo/bar.csv"
 ```
 
-#### Get the PBS JOBID (if there is one).
-
-```
-get_pbs_jobid()
-# [1] "377353.cfe1"
-```
-
-#### Retrieve the number of available cores that is sensitive to the PBS computing environment.
-
-```
-count_cores()
-# [1] 8
-```
-
-#### Strip or add file extensions.
-
-```
-filename = "foo/bar.csv"
-strip_extension(filename, ".csv")
-# [1] "foo/bar"
-add_extension(filename, ".gz")
-# [1] "foo/bar.csv.gz"
-```
-
-#### Read a configuration file.
-
-```
-cfg <- read_config("~/edna/edna-dada2/config/dada2_example.yml")
-```
-
-See more about configurations in the [wiki](https://github.com/BigelowLab/dadautils/wiki/Configuration-file).
-
-#### Create an audit of the state of R (version, cores, library catalog). 
-
-Print it to screen or write it to a file.
-
-```
-audit()
-audit(filename = "~/foo/bar/audit.txt")
-```
-
 #### File pair listings
 
-Input files are often in pairs (forward and reverse) that are distinguished by naming pattern. This function will list those found in a directory and return a two element list.  These are very convenient and the list is used as a standard input to `dadautils` wrapper functions where appropriate.
+Input files are often in pairs (forward and reverse) that are distinguished by naming pattern. This function will list those found in a directory and return a two element list.  These are very convenient and the list is used as a standard input to `dadautils` wrapper functions where appropriate. Some datasets do not have paired files (PacBio for instance), in this case we proceed with a filepair listing approach where one of the filepair elements is empty.
 
 ```
 fq_files <- list_filepairs("/home/btupper/edna/data/examples/ben_demo_raw/filtN",
@@ -167,21 +136,6 @@ str(fq_files)
 #  $ reverse: chr [1:2] 
 #     "/home/btupper/edna/data/examples/ben_demo_raw/filtN/BR2_2016_S216_L001_R2_001.fastq" 
 #     "/home/btupper/edna/data/examples/ben_demo_raw/filtN/BR3_2016_S228_L001_R2_001.fastq"
-```
-
-#### Save and load as RDS objects
-
-Sometimes it is convenient to save a variable (an object) as an R-centric data file.  Typically one would use [saveRDS and readRDS](https://www.rdocumentation.org/packages/base/versions/3.6.2/topics/readRDS). Here we provide a convenience wrapper functions `read_RDS()` and `write_RDS`. In particular, `write_RDS()` is tidy-like so it can be used in piped workflows.
-
-```
-x <- reader::read_csv("my-data-file.csv") %>%
-  do_something_tricky() %>%
-  write_RDS("my-rds-1.rds") %>%
-  do_something_else() %>%
-  write_RDS("my-rds-2.rds")
-
-y1 <- read_RDS("my-rds-1.rds")
-y2 <- read_RDS("my-rds-2.rds")
 ```
 
 ### Wrapper functions

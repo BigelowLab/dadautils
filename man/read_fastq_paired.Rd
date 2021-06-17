@@ -7,7 +7,7 @@
 read_fastq_paired(filelist = example_filepairs())
 }
 \arguments{
-\item{filelist}{named list of sorted forward and reverse filenames}
+\item{filelist}{named list of sorted forward and reverse filenames (reverse may be empty)}
 }
 \value{
 named list of \code{\link[ShortRead]{ShortReadQ}} objects for foreward and reverse
