@@ -95,52 +95,26 @@ read_fastq_paired <- function(filelist = example_filepairs()){
       }, simplify = FALSE)
 }
 
-#' Compute scores for \code{\link[ShortRead]{ShortReadQ}} objects listing
-#'
-#' @seealso \code{\link[ShortRead]{alphabetScore}}
-#'
-#' @export
-#' @param x named list of sorted forward and reverse \code{\link[ShortRead]{ShortReadQ}} objects (one or both maybe empty)
-#' @param fun the function to score by  either \code{ShortRead::alphabetScore} or \code{ShortRead::alphabetByCycle}
-#' @return named list of quality score vectors as returned by \code{\link[ShortRead]{alphabetScore}} OR
-#'  named list of quality score arrays as returned by \code{\link[ShortRead]{alphabetByCycle}} OR
-#'  named list of empty elements where input obects may be empty
-score_paired <- function(x = read_fastq_paired(),
-  fun = ShortRead::alphabetScore){
-  sapply(x,
-    function(x){
-      if (length(x) > 0){
-        r <- sapply(x, fun, simplify = FALSE)
-      } else {
-        r <- NULL
-      }
-      r
-    }, simplify = FALSE)
-}
-
-
-
 #' Compute quality scores using \code{\link[Rsubread]{qualityScores}}
 #' 
 #' @export
 #' @param filelist a paired list forward/reverse filenames (one or both may be empty)
 #' @param nreads numeric, see \code{\link[Rsubread]{qualityScores}}
-#' @param ... other arguments for \code{\link[Rsubread]{qualityScores}}
 #' @return a paired list of quality score matrices or NULL if that component of inputs is empty
-paired_quality_scores <- function(filelist = example_filepairs(), nreads = -1, ...) {
+paired_quality_scores <- function(filelist = example_filepairs(), nreads = -1) {
   sapply(filelist,
-    function(files){
+    function(files, nreads = -1){
       if (length(files) > 0){
-        r <- apply(files, 
-          function(file) {
-            suppressMessages(Rsubread::qualityScores(file, nreads = nreads, ...))
-          }) %>%
+        r <- lapply(files, 
+          function(file, nreads = -1) {
+            Rsubread::qualityScores(file, nreads = nreads)
+          }, nreads = nreads) %>%
           stats::setNames(basename(files))
       } else {
         r <- NULL
       }
       r
-    }, simplify = FALSE)
+    }, nreads = nreads, simplify = FALSE)
 }
 
 #' Compute EE per read for \code{\link[Rsubread]{qualityScores}} (one or both may be empty)
@@ -154,19 +128,18 @@ paired_ee_per_read <- function(x = paired_quality_scores(),
   fun = sum, na.rm = TRUE){
   
   sapply(x,
-    function(scores_dir){
+    function(scores_dir, fun = sum, na.rm = TRUE){
       if (length(scores_dir) > 0){
         r <- lapply(scores_dir,
-          function(s){
-            ee <- 10^(-s/10)
+          function(s, fun = sum, na.rm = TRUE){
+            ee <- 10^(-1*s/10)
             apply(ee, 1, fun, na.rm = na.rm)
-          })
+          }, fun = fun, na.rm = na.rm)
       } else {
         r <- NULL
       }
       r
-    }
-    ,simplify = FALSE)
+    }, fun = fun, na.rm = na.rm, simplify = FALSE)
 }
 
 #' Threshold paired expected error computations
@@ -180,17 +153,16 @@ paired_ee_per_read <- function(x = paired_quality_scores(),
 paired_ee_threshold <- function(x = paired_ee_per_read(),
   thresholds = c(1,2,3,4,5),
   op = `<=`){
-  # sapply(ee, function(ee) sapply(ee, function(e) sum(e <= 2)), simplify = F)
   sapply(x,
-    function(xx){
+    function(xx, op = `<=`){
       if (length(xx) > 0){
         r <- sapply(xx,
-          function(e){
+          function(e, op = `<=`, thresholds = c(1,2,3,4,5)){
             sapply(thresholds,
-              function(thresh) sum(op(e,thresh)) , simplify = FALSE) %>%
+              function(thresh, op = `<=`) sum(op(e,thresh))/length(e) , simplify = FALSE) %>%
               setNames(paste("t", thresholds, sep = "_")) %>%
               dplyr::as_tibble()
-          }, simplify = FALSE) %>%
+          }, op = op, thresholds = thresholds, simplify = FALSE) %>%
           dplyr::bind_rows() %>%
           dplyr::mutate(file = names(xx)) %>%
           dplyr::relocate(file, .before = 1)
@@ -251,4 +223,26 @@ paired_ee_threshold <- function(x = paired_ee_per_read(),
 #     read_fastq_paired() %>%
 #     score_paired() %>%
 #     ee_paired()
+# }
+# #' Compute scores for \code{\link[ShortRead]{ShortReadQ}} objects listing
+# #'
+# #' @seealso \code{\link[ShortRead]{alphabetScore}}
+# #'
+# #' @export
+# #' @param x named list of sorted forward and reverse \code{\link[ShortRead]{ShortReadQ}} objects (one or both maybe empty)
+# #' @param fun the function to score by  either \code{ShortRead::alphabetScore} or \code{ShortRead::alphabetByCycle}
+# #' @return named list of quality score vectors as returned by \code{\link[ShortRead]{alphabetScore}} OR
+# #'  named list of quality score arrays as returned by \code{\link[ShortRead]{alphabetByCycle}} OR
+# #'  named list of empty elements where input obects may be empty
+# score_paired <- function(x = read_fastq_paired(),
+#   fun = ShortRead::alphabetScore){
+#   sapply(x,
+#     function(x){
+#       if (length(x) > 0){
+#         r <- sapply(x, fun, simplify = FALSE)
+#       } else {
+#         r <- NULL
+#       }
+#       r
+#     }, simplify = FALSE)
 # }

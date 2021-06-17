@@ -3,7 +3,8 @@ library(dplyr)
 library(ggplot2)
 library(charlier)
 #library(dadautils)
-devtools::load_all()
+devtools::load_all("/mnt/storage/data/edna/packages/dadautils")
+
 library(ShortRead)
 library(Rsubread)
 
@@ -12,7 +13,12 @@ library(Rsubread)
 
 PATH <- "/mnt/storage/data/edna/dada/projects/robin_foo/cyanos/cutadapt/lowquality"
 files <- list_filepairs(PATH)
-ee = expected_error_paired(files)
+ee = paired_quality_scores(files)
+
+pp = paired_ee_per_read(ee)
+
+tt =  paired_ee_threshold()
+  
 
   
 quality_scores <- function(filelist = example_filepairs(), nreads = -1, ...) {

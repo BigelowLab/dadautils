@@ -4,14 +4,12 @@
 \alias{paired_quality_scores}
 \title{Compute quality scores using \code{\link[Rsubread]{qualityScores}}}
 \usage{
-paired_quality_scores(filelist = example_filepairs(), nreads = -1, ...)
+paired_quality_scores(filelist = example_filepairs(), nreads = -1)
 }
 \arguments{
 \item{filelist}{a paired list forward/reverse filenames (one or both may be empty)}
 
 \item{nreads}{numeric, see \code{\link[Rsubread]{qualityScores}}}
-
-\item{...}{other arguments for \code{\link[Rsubread]{qualityScores}}}
 }
 \value{
 a paired list of quality score matrices or NULL if that component of inputs is empty

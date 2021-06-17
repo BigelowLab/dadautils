@@ -5,6 +5,7 @@
 #' @param output_path character, the output path
 #' @param compress logical, see \code{\link[dada2]{filterAndTrim}}
 #' @param multithread numeric, the number of cores to use. Defaults to \code{\link{count_cores}}
+#' @param truncLen character or numeric.  If character and "auto" then auto-compite trunLen, default "auto"
 #' @param ... other arguments for \code{\link[dada2]{filterAndTrim}}
 #' @param save_results logical, save CSV if TRUE
 #' @return integer matrix as tibble see \code{\link[dada2]{filterAndTrim}}
@@ -12,7 +13,8 @@ filter_and_trim <- function(filelist,
                             output_path = file.path(dirname(filelist$forward[1]),'filterAndTrim'),
                             save_results = FALSE,
                             compress = TRUE,
-                            multithread = count_cores(),
+                            multithread = charlier::count_cores(),
+                            truncLen = "auto",
                             ...){
 
   ffilt <- file.path(output_path, basename(filelist$forward))
@@ -30,15 +32,54 @@ filter_and_trim <- function(filelist,
     rfilt <- if(!norev) charlier::add_extension(rfilt, ext = ".gz", no_dup = TRUE)
   }
 
-  x <- dada2::filterAndTrim(filelist$forward,
-                            ffilt,
-                            rev = if (norev) { NULL } else { filelist$reverse},
-                            filt.rev = rfilt,
-                            compress = compress,
-                            multithread = multithread,
-                            ...)
-
-  x <- dplyr::as_tibble(x, rownames = "name")
+  
+  if (inherits(truncLen, 'character') && tolower(truncLen[1]) == "auto"){
+    # if here, compute cutoffs 'truncLen' per file
+    # apply filter and trim per file pair
+    
+    cutoffs <- sapply(filelist,
+      function(files){
+        if (length(files) > 0){
+          r <- quality_profile_data(files) %>%
+              quality_profile_cutoff() %>%
+              `[[`("cutoff")
+        } else {
+          r <- NULL
+        }
+        r
+      }, simplify = FALSE)
+    
+      x <- lapply( seq_along(filelist[[1]]),
+        function(i){
+          if (norev){
+            trunc_len <- cutoffs$forward$Cycle[i]
+          } else {
+            trunc_len <- c(cutoffs$forward$Cycle[i], cutoffs$reverse$Cycle[i])
+          }
+          dada2::filterAndTrim(filelist$forward[i],
+                               ffilt[i],
+                               rev = if (norev) { NULL } else {filelist$reverse[i]},
+                               filt.rev = rfilt[i],
+                               compress = compress,
+                               multithread = multithread,
+                               truncLen = trunc_len,
+                               ...) %>%
+              dplyr::as_tibble(rownames = "name")
+        }) %>%
+        dplyr::bind_rows()
+    
+  } else {
+    x <- dada2::filterAndTrim(filelist$forward,
+                              ffilt,
+                              rev = if (norev) { NULL } else { filelist$reverse},
+                              filt.rev = rfilt,
+                              compress = compress,
+                              multithread = multithread,
+                              tuncLen = truncLen,
+                              ...) %>%
+    dplyr::as_tibble(x, rownames = "name")
+  }
+  
   if (save_results) {
     x <- readr::write_csv(x, file.path(output_path, "filter_and_trim-results.csv"))
   }
