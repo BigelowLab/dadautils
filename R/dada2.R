@@ -75,7 +75,7 @@ filter_and_trim <- function(filelist,
                               filt.rev = rfilt,
                               compress = compress,
                               multithread = multithread,
-                              tuncLen = truncLen,
+                              truncLen = truncLen,
                               ...) %>%
     dplyr::as_tibble(x, rownames = "name")
   }
