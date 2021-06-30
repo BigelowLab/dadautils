@@ -381,7 +381,9 @@ quality_profile <- function(
 #' @param aggregate (Optional). Default FALSE.
 #'        If TRUE, compute an aggregate quality profile for all fastq files provided.
 #' @param amplicon_length numeric, the expected amplicon length, used to compute expected overlap
+#' @param min_overlap numeric, issue warnings for any overlap less than this value 
 #' @param ... arguments for \code{\link{quality_profile_cutoff}}
+#' @return complex list of forward, reverse and merged quality stats 
 quality_profile_pairs <- function(
   filelist = list(
     forward = c(system.file("extdata", "sam1F.fastq.gz", package="dada2"),
@@ -391,6 +393,7 @@ quality_profile_pairs <- function(
   n = 500000, 
   aggregate = FALSE, 
   amplicon_length = 400,
+  min_overlap = 20, 
   ...){
 
   if (FALSE){
@@ -415,5 +418,11 @@ quality_profile_pairs <- function(
         }) %>%
         dplyr::bind_cols() %>%
         dplyr::mutate(overlap = overlap(f = .data$fCycle, r = .data$rCycle, a = amplicon_length))
+     
+    ix <- xx[['overlap']]$overlap < min_overlap[1]
+    if (any(ix)){
+      warning(sprintf("one or more overlaps fall below minimum of %i", min_overlap))
+    }
+          
     invisible(xx)
 }
