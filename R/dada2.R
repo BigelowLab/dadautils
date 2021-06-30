@@ -10,6 +10,7 @@
 #'    \code{\link{quality_profile_cutoff}}
 #' @param ... other arguments for \code{\link[dada2]{filterAndTrim}}
 #' @param save_results logical, save CSV if TRUE
+#' @param verbose logical, if TRUE output informational messages
 #' @return integer matrix as tibble see \code{\link[dada2]{filterAndTrim}}
 filter_and_trim <- function(filelist,
                             output_path = file.path(dirname(filelist$forward[1]),'filterAndTrim'),
@@ -18,6 +19,7 @@ filter_and_trim <- function(filelist,
                             multithread = charlier::count_cores(),
                             truncLen = "auto",
                             cutoff_params = list(score = 30, model = "Mean ~ poly(Cycle, 2)"),
+                            verbose = FALSE, 
                             ...){
 
   ffilt <- file.path(output_path, basename(filelist$forward))
@@ -59,6 +61,24 @@ filter_and_trim <- function(filelist,
           } else {
             trunc_len <- c(cutoffs$forward$Cycle[i], cutoffs$reverse$Cycle[i])
           }
+          
+          if (verbose){
+            cat("filterAndTrim:\n")
+            cat(sprintf("  forward file: %s", basename(filelist$forward[i])))
+            if (norev){
+              cat("  reverse file: none\n")
+            } else {
+              cat(sprintf("  reverse file: %s", basename(filelist$reverse[i])))
+            }
+            cat(sprintf("  compress: %s", compress), "\n")
+            cat(sprintf("  multithread: %s", multithread), "\n")
+            cat(sprintf("  trunLen: %s", paste(trunc_len, collapse = " ")), "\n")
+            dots <- list(...)
+            for (n in names(dots)){
+              cat(sprintf("  %s: %s", n, paste(dots[[n]], collapse = " ")), "\n")
+            }
+          }
+          
           dada2::filterAndTrim(filelist$forward[i],
                                ffilt[i],
                                rev = if (norev) { NULL } else {filelist$reverse[i]},

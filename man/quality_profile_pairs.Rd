@@ -12,6 +12,7 @@ quality_profile_pairs(
   n = 5e+05,
   aggregate = FALSE,
   amplicon_length = 400,
+  min_overlap = 20,
   ...
 )
 }
@@ -26,7 +27,12 @@ If TRUE, compute an aggregate quality profile for all fastq files provided.}
 
 \item{amplicon_length}{numeric, the expected amplicon length, used to compute expected overlap}
 
+\item{min_overlap}{numeric, issue warnings for any overlap less than this value}
+
 \item{...}{arguments for \code{\link{quality_profile_cutoff}}}
+}
+\value{
+complex list of forward, reverse and merged quality stats
 }
 \description{
 This a thin wrapper around \code{\link[dada2]{plotQualityProfile}} but produces a list
