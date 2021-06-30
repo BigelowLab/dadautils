@@ -12,6 +12,7 @@ filter_and_trim(
   multithread = charlier::count_cores(),
   truncLen = "auto",
   cutoff_params = list(score = 30, model = "Mean ~ poly(Cycle, 2)"),
+  verbose = FALSE,
   ...
 )
 }
@@ -30,6 +31,8 @@ filter_and_trim(
 
 \item{cutoff_params}{list, in the even that trunLen is "auto" then pass these params to 
 \code{\link{quality_profile_cutoff}}}
+
+\item{verbose}{logical, if TRUE output informational messages}
 
 \item{...}{other arguments for \code{\link[dada2]{filterAndTrim}}}
 }

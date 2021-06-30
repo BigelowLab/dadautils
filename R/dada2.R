@@ -92,6 +92,24 @@ filter_and_trim <- function(filelist,
         dplyr::bind_rows()
     
   } else {
+    
+    if (verbose){
+      cat("filterAndTrim:\n")
+      cat(sprintf("  forward file: %s", basename(filelist$forward[i])))
+      if (norev){
+        cat("  reverse file: none\n")
+      } else {
+        cat(sprintf("  reverse file: %s", basename(filelist$reverse[i])))
+      }
+      cat(sprintf("  compress: %s", compress), "\n")
+      cat(sprintf("  multithread: %s", multithread), "\n")
+      cat(sprintf("  trunLen: %s", paste(trunc_len, collapse = " ")), "\n")
+      dots <- list(...)
+      for (n in names(dots)){
+        cat(sprintf("  %s: %s", n, paste(dots[[n]], collapse = " ")), "\n")
+      }
+    }
+    
     x <- dada2::filterAndTrim(filelist$forward,
                               ffilt,
                               rev = if (norev) { NULL } else { filelist$reverse},
