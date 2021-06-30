@@ -5,7 +5,9 @@
 #' @param output_path character, the output path
 #' @param compress logical, see \code{\link[dada2]{filterAndTrim}}
 #' @param multithread numeric, the number of cores to use. Defaults to \code{\link{count_cores}}
-#' @param truncLen character or numeric.  If character and "auto" then auto-compite trunLen, default "auto"
+#' @param truncLen character or numeric.  If character and "auto" then auto-compute trunLen, default "auto"
+#' @param cutoff_params list, in the even that trunLen is "auto" then pass these params to 
+#'    \code{\link{quality_profile_cutoff}}
 #' @param ... other arguments for \code{\link[dada2]{filterAndTrim}}
 #' @param save_results logical, save CSV if TRUE
 #' @return integer matrix as tibble see \code{\link[dada2]{filterAndTrim}}
@@ -15,6 +17,7 @@ filter_and_trim <- function(filelist,
                             compress = TRUE,
                             multithread = charlier::count_cores(),
                             truncLen = "auto",
+                            cutoff_params = list(score = 30, model = "Mean ~ poly(Cycle, 2)"),
                             ...){
 
   ffilt <- file.path(output_path, basename(filelist$forward))
@@ -41,7 +44,7 @@ filter_and_trim <- function(filelist,
       function(files){
         if (length(files) > 0){
           r <- quality_profile_data(files) %>%
-              quality_profile_cutoff() %>%
+              quality_profile_cutoff(params = cutoff_params) %>%
               `[[`("cutoff")
         } else {
           r <- NULL

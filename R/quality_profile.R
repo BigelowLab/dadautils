@@ -22,16 +22,24 @@
 #'  }
 quality_profile_cutoff <- function(x = quality_profile_data(),
   method = "ruler",
-  params = list(Score = 25, formula = stats::as.formula("Mean ~ poly(Cycle, 2)")),
+  params = list(score = 30, model = "Mean ~ poly(Cycle, 2)"),
   form = c("full", "reduced")[2]){
    
     r <- NULL
     if (tolower(method[1]) == "ruler"){
+      
+      #' function to compute model and do cutoffs using Pete/Robin horizontal ruler
+      #' x1 tibble 
+      #' key tibble - ignored
+      #' threshold - where the ruler is placed in Quality Score values
+      #' model - model as formula or character to be cast as formula
+      #' form character (if 'reduced' then retrive just the place where the cutoff occurs)
       fit_ruler <- function(x1, key, 
-                            threshold = 25, 
-                            formula = stats::as.formula("Mean ~ poly(Cycle, 2)"),
+                            threshold = 30, 
+                            model = stats::as.formula("Mean ~ poly(Cycle, 2)"),
                             form = "reduced"){
-        f <- lm(formula, data = x1)
+        if (!inherits(model, "formula")) model <- as.formula(model)
+        f <- lm(model, data = x1)
         p <- predict(f) %>% 
           dplyr::as_tibble(rownames = "Cycle") %>%
           dplyr::mutate(Cycle = as.numeric(.data$Cycle)) %>%
@@ -53,8 +61,8 @@ quality_profile_cutoff <- function(x = quality_profile_data(),
       r <- x$statdf %>%
         dplyr::group_by(.data$file) %>%
         dplyr::group_map(fit_ruler, .keep = TRUE, 
-                         threshold = params$Score,
-                         formula = params$formula,
+                         threshold = params$score,
+                         model = params$model,
                          form = form) %>%
         dplyr::bind_rows()
     } else {

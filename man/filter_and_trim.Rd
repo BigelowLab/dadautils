@@ -11,6 +11,7 @@ filter_and_trim(
   compress = TRUE,
   multithread = charlier::count_cores(),
   truncLen = "auto",
+  cutoff_params = list(score = 30, model = "Mean ~ poly(Cycle, 2)"),
   ...
 )
 }
@@ -25,7 +26,10 @@ filter_and_trim(
 
 \item{multithread}{numeric, the number of cores to use. Defaults to \code{\link{count_cores}}}
 
-\item{truncLen}{character or numeric.  If character and "auto" then auto-compite trunLen, default "auto"}
+\item{truncLen}{character or numeric.  If character and "auto" then auto-compute trunLen, default "auto"}
+
+\item{cutoff_params}{list, in the even that trunLen is "auto" then pass these params to 
+\code{\link{quality_profile_cutoff}}}
 
 \item{...}{other arguments for \code{\link[dada2]{filterAndTrim}}}
 }

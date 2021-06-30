@@ -7,7 +7,7 @@
 quality_profile_cutoff(
   x = quality_profile_data(),
   method = "ruler",
-  params = list(Score = 25, formula = stats::as.formula("Mean ~ poly(Cycle, 2)")),
+  params = list(score = 30, model = "Mean ~ poly(Cycle, 2)"),
   form = c("full", "reduced")[2]
 )
 }
@@ -40,4 +40,10 @@ Compute cutoff levels \code{trunLen} for \code{\link[dada2]{filterAndTrim}}
   result <- quality_profile_data(files) \%>\%
    quality_profile_cutoff()
  }
+function to compute model and do cutoffs using Pete/Robin horizontal ruler
+x1 tibble 
+key tibble - ignored
+threshold - where the ruler is placed in Quality Score values
+model - model as formula or character to be cast as formula
+form character (if 'reduced' then retrive just the place where the cutoff occurs)
 }
