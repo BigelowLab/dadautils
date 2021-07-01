@@ -72,7 +72,7 @@ filter_and_trim <- function(filelist,
             }
             cat(sprintf("  compress: %s", compress), "\n")
             cat(sprintf("  multithread: %s", multithread), "\n")
-            cat(sprintf("  trunLen: %s", paste(trunc_len, collapse = " ")), "\n")
+            cat(sprintf("  truncLen: %s", paste(trunc_len, collapse = " ")), "\n")
             dots <- list(...)
             for (n in names(dots)){
               cat(sprintf("  %s: %s", n, paste(dots[[n]], collapse = " ")), "\n")
@@ -103,7 +103,7 @@ filter_and_trim <- function(filelist,
       }
       cat(sprintf("  compress: %s", compress), "\n")
       cat(sprintf("  multithread: %s", multithread), "\n")
-      cat(sprintf("  trunLen: %s", paste(trunc_len, collapse = " ")), "\n")
+      cat(sprintf("  truncLen: %s", paste(trunc_len, collapse = " ")), "\n")
       dots <- list(...)
       for (n in names(dots)){
         cat(sprintf("  %s: %s", n, paste(dots[[n]], collapse = " ")), "\n")

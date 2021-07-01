@@ -28,12 +28,12 @@ quality_profile_cutoff <- function(x = quality_profile_data(),
     r <- NULL
     if (tolower(method[1]) == "ruler"){
       
-      #' function to compute model and do cutoffs using Pete/Robin horizontal ruler
-      #' x1 tibble 
-      #' key tibble - ignored
-      #' threshold - where the ruler is placed in Quality Score values
-      #' model - model as formula or character to be cast as formula
-      #' form character (if 'reduced' then retrive just the place where the cutoff occurs)
+      # function to compute model and do cutoffs using Pete/Robin horizontal ruler
+      # x1 tibble 
+      # key tibble - ignored
+      # threshold - where the ruler is placed in Quality Score values
+      # model - model as formula or character to be cast as formula
+      # form character (if 'reduced' then retrive just the place where the cutoff occurs)
       fit_ruler <- function(x1, key, 
                             threshold = 30, 
                             model = stats::as.formula("Mean ~ poly(Cycle, 2)"),
@@ -382,6 +382,8 @@ quality_profile <- function(
 #'        If TRUE, compute an aggregate quality profile for all fastq files provided.
 #' @param amplicon_length numeric, the expected amplicon length, used to compute expected overlap
 #' @param min_overlap numeric, issue warnings for any overlap less than this value 
+#' @param overlap_file character or NULL, if provided save the overlap table to this file as CSV
+#'   NULL to skip writing the file
 #' @param ... arguments for \code{\link{quality_profile_cutoff}}
 #' @return complex list of forward, reverse and merged quality stats 
 quality_profile_pairs <- function(
@@ -394,19 +396,9 @@ quality_profile_pairs <- function(
   aggregate = FALSE, 
   amplicon_length = 400,
   min_overlap = 20, 
+  overlap_file = file.path(dirname(filelist$forward[1]), "overlap.csv"),
   ...){
 
-  if (FALSE){
-    filelist = list(
-      forward = c(system.file("extdata", "sam1F.fastq.gz", package="dada2"),
-                  system.file("extdata", "sam2F.fastq.gz", package="dada2")),
-      reverse = c(system.file("extdata", "sam1R.fastq.gz", package="dada2"),
-                  system.file("extdata", "sam2R.fastq.gz", package="dada2")))
-    n = 500000
-    aggregate = FALSE
-    amplicon_length = 400
-    xx <- lapply(filelist, quality_profile, n = n, aggregate = aggregate)
-  }
     xx <- lapply(filelist, quality_profile, n = n, aggregate = aggregate, ...)
     
     overlap <- function(f = 250, r = 189, a = 400){f - (a-r)}
@@ -423,6 +415,13 @@ quality_profile_pairs <- function(
     if (any(ix)){
       warning(sprintf("one or more overlaps fall below minimum of %i", min_overlap))
     }
-          
+        
+    # write a modified overlap file if provided a filename
+    if (!is.null(overlap_file) && !is.na(overlap_file)){
+      dummy <- x$overlap %>%
+        dplyr::select(-.data$fmodel, -.data$rmodel) %>%
+        dplyr::mutate(amplicon_length = amplicon_length) %>%
+        readr::write_csv(overlap_file[1])
+    }  
     invisible(xx)
 }
