@@ -56,6 +56,7 @@ filter_and_trim <- function(filelist,
     
       x <- lapply( seq_along(filelist[[1]]),
         function(i){
+          trunLen <- c(0, 0)
           if (norev){
             trunc_len <- cutoffs$forward$Cycle[i]
           } else {
@@ -64,11 +65,11 @@ filter_and_trim <- function(filelist,
           
           if (verbose){
             cat("filterAndTrim:\n")
-            cat(sprintf("  forward file: %s", basename(filelist$forward[i])))
+            cat(sprintf("  forward file: %s", basename(filelist$forward[i])), "\n")
             if (norev){
               cat("  reverse file: none\n")
             } else {
-              cat(sprintf("  reverse file: %s", basename(filelist$reverse[i])))
+              cat(sprintf("  reverse file: %s", basename(filelist$reverse[i])), "\n")
             }
             cat(sprintf("  compress: %s", compress), "\n")
             cat(sprintf("  multithread: %s", multithread), "\n")
@@ -95,15 +96,15 @@ filter_and_trim <- function(filelist,
     
     if (verbose){
       cat("filterAndTrim:\n")
-      cat(sprintf("  forward file: %s", basename(filelist$forward[i])))
+      cat(sprintf("  first forward file: %s", basename(filelist$forward[1])), "\n")
       if (norev){
         cat("  reverse file: none\n")
       } else {
-        cat(sprintf("  reverse file: %s", basename(filelist$reverse[i])))
+        cat(sprintf("  first reverse file: %s", basename(filelist$reverse[1])), "\n")
       }
       cat(sprintf("  compress: %s", compress), "\n")
       cat(sprintf("  multithread: %s", multithread), "\n")
-      cat(sprintf("  truncLen: %s", paste(trunc_len, collapse = " ")), "\n")
+      cat(sprintf("  truncLen: %s", paste(truncLen, collapse = " ")), "\n")
       dots <- list(...)
       for (n in names(dots)){
         cat(sprintf("  %s: %s", n, paste(dots[[n]], collapse = " ")), "\n")

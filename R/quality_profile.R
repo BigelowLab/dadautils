@@ -399,6 +399,13 @@ quality_profile_pairs <- function(
   overlap_file = file.path(dirname(filelist$forward[1]), "overlap.csv"),
   ...){
 
+    if (FALSE){
+      n = 500000
+      aggregate = FALSE
+      amplicon_length = 400
+      min_overlap = 20
+    }
+
     xx <- lapply(filelist, quality_profile, n = n, aggregate = aggregate, ...)
     
     overlap <- function(f = 250, r = 189, a = 400){f - (a-r)}
@@ -418,7 +425,7 @@ quality_profile_pairs <- function(
         
     # write a modified overlap file if provided a filename
     if (!is.null(overlap_file) && !is.na(overlap_file)){
-      dummy <- x$overlap %>%
+      dummy <- xx$overlap %>%
         dplyr::select(-.data$fmodel, -.data$rmodel) %>%
         dplyr::mutate(amplicon_length = amplicon_length) %>%
         readr::write_csv(overlap_file[1])

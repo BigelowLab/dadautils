@@ -40,10 +40,4 @@ Compute cutoff levels \code{trunLen} for \code{\link[dada2]{filterAndTrim}}
   result <- quality_profile_data(files) \%>\%
    quality_profile_cutoff()
  }
-function to compute model and do cutoffs using Pete/Robin horizontal ruler
-x1 tibble 
-key tibble - ignored
-threshold - where the ruler is placed in Quality Score values
-model - model as formula or character to be cast as formula
-form character (if 'reduced' then retrive just the place where the cutoff occurs)
 }
