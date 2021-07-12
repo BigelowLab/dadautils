@@ -34,7 +34,7 @@ Provides utility functions for working with [dada2](https://benjjneb.github.io/d
 
 + [ggplot2](https://CRAN.R-project.org/package=ggplot2)
 
- +[charlier](https://github.com/BigelowLab/charlier)
+ + [charlier](https://github.com/BigelowLab/charlier)
 	
 
 ### Note
@@ -43,7 +43,7 @@ All of the requirements are preinstalled in the charlie module `dada2`.  If you 
 
 ### Note
 
-This package is [dada2-centric](https://benjjneb.github.io/dada2/index.html) , but you may find the [charlier R package](https://github.com/BigelowLab/charlier) useful for general usage on charlie with `dadautils`.
+This package is [dada2-centric](https://benjjneb.github.io/dada2/index.html) , but you may find the [charlier R package](https://github.com/BigelowLab/charlier) useful for general usage on charlie with in concert with `dadautils`.
 
 ### Installation from [github](https://github.com)
 
