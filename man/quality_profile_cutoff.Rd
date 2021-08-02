@@ -7,7 +7,7 @@
 quality_profile_cutoff(
   x = quality_profile_data(),
   method = "ruler",
-  params = list(score = 30, model = "Mean ~ poly(Cycle, 2)"),
+  params = list(score = 30, model = "Mean ~ poly(Cycle, 2)", quantile_min = 0.99),
   form = c("full", "reduced")[2]
 )
 }
@@ -16,7 +16,13 @@ quality_profile_cutoff(
 
 \item{method}{character the threshold method to use - just "ruler" method now}
 
-\item{params}{list (or NULL) of parameters needed to implement the specified method}
+\item{params}{list (or NULL) of parameters needed to implement the specified method 
+\itemize{
+  \item{score numeric,  the threshold score to use with "ruler" method}
+  \item{model character, the model}
+  \item{quantile_min numeric, quantile minimum used as a back stop if ruler method fails, set to NA to skip.  Only
+        used if form is "reduced".}
+}}
 
 \item{form}{character either "full" or "reduced".  If reduce return just the threshold row.}
 }

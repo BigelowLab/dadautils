@@ -4,6 +4,12 @@
 #' @param x list of quality score data as per \code{quality_profile_data}
 #' @param method character the threshold method to use - just "ruler" method now
 #' @param params list (or NULL) of parameters needed to implement the specified method 
+#' \itemize{
+#'   \item{score numeric,  the threshold score to use with "ruler" method}
+#'   \item{model character, the model}
+#'   \item{quantile_min numeric, quantile minimum used as a back stop if ruler method fails, set to NA to skip.  Only
+#'         used if form is "reduced".}
+#' }
 #' @param form character either "full" or "reduced".  If reduce return just the threshold row.
 #' @return the input list with an added cutoff tibble of 
 #' \itemize{
@@ -22,7 +28,7 @@
 #'  }
 quality_profile_cutoff <- function(x = quality_profile_data(),
   method = "ruler",
-  params = list(score = 30, model = "Mean ~ poly(Cycle, 2)"),
+  params = list(score = 30, model = "Mean ~ poly(Cycle, 2)", quantile_min = 0.99),
   form = c("full", "reduced")[2]){
    
     r <- NULL
@@ -36,20 +42,38 @@ quality_profile_cutoff <- function(x = quality_profile_data(),
       # form character (if 'reduced' then retrive just the place where the cutoff occurs)
       fit_ruler <- function(x1, key, 
                             threshold = 30, 
+                            quantile_min = 0.9, 
                             model = stats::as.formula("Mean ~ poly(Cycle, 2)"),
                             form = "reduced"){
         if (!inherits(model, "formula")) model <- as.formula(model)
+          
+        
+            
         f <- lm(model, data = x1)
         p <- predict(f) %>% 
           dplyr::as_tibble(rownames = "Cycle") %>%
           dplyr::mutate(Cycle = as.numeric(.data$Cycle)) %>%
           dplyr::rename(Score = .data$value) 
-        ix <- which(findInterval(p$Score, threshold) > 0)
-        ix <- ix[length(ix)]
+           
         p <- p %>%  
           dplyr::mutate(model = list(f), 
                         file = x1$file)
+                        
         if (tolower(form[1]) == "reduced"){
+          
+          if (!is.na(quantile_min[1])){
+            # here we select those at or below the 90th percentile 
+            q_min <- ShortRead::readFastq(x1$file) %>%
+              ShortRead::width() %>%
+              stats::quantile(probs = quantile_min[1], names = FALSE)
+            ix <- which(p$Cycle <= q_min)
+            ix <- ix[length(ix)]
+          } else {
+            # here we use the automated cutoff
+            ix <- which(findInterval(p$Score, threshold[1]) > 0)
+            ix <- ix[length(ix)]
+          }
+          
           p <- p %>%
             dplyr::slice(ix)
         }
@@ -60,7 +84,8 @@ quality_profile_cutoff <- function(x = quality_profile_data(),
       # evaluate at params$Score
       r <- x$statdf %>%
         dplyr::group_by(.data$file) %>%
-        dplyr::group_map(fit_ruler, .keep = TRUE, 
+        dplyr::group_map(fit_ruler, 
+                         .keep = TRUE, 
                          threshold = params$score,
                          model = params$model,
                          form = form) %>%

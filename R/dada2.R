@@ -18,7 +18,7 @@ filter_and_trim <- function(filelist,
                             compress = TRUE,
                             multithread = charlier::count_cores(),
                             truncLen = "auto",
-                            cutoff_params = list(score = 30, model = "Mean ~ poly(Cycle, 2)"),
+                            cutoff_params = list(score = 30, model = "Mean ~ poly(Cycle, 2)", quantile_min = 0.99),
                             verbose = FALSE, 
                             ...){
 
