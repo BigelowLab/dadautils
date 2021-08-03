@@ -15,6 +15,7 @@
 #' \itemize{
 #'  \item{Cycle the predicted Cycle value - the computed cutoff}
 #'  \item{Score the fitted Score value}
+#'  \item{status "a" for autothreshold, "f" for fixed threshold, "p" for percentile threshold}
 #'  \item{overlap the expected overlap at the cutoff (forward cutoff len + )}
 #'  \item{model the model as a list column (for example an lm model)}
 #'  \item{file the name of the file}
@@ -57,7 +58,8 @@ quality_profile_cutoff <- function(x = quality_profile_data(),
            
         p <- p %>%  
           dplyr::mutate(model = list(f), 
-                        file = x1$file)
+                        file = x1$file,
+                        status = "a")
                         
         if (tolower(form[1]) == "reduced"){
           
@@ -68,6 +70,8 @@ quality_profile_cutoff <- function(x = quality_profile_data(),
               stats::quantile(probs = quantile_min[1], names = FALSE)
             ix <- which(p$Cycle <= q_min)
             ix <- ix[length(ix)]
+            p <- p %>%
+              dplyr::mutate(status = sprintf("p_%0.2f", quantile_min[1]))
           } else {
             # here we use the automated cutoff
             ix <- which(findInterval(p$Score, threshold[1]) > 0)

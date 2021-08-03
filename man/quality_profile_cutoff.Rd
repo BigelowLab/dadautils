@@ -31,6 +31,7 @@ the input list with an added cutoff tibble of
 \itemize{
  \item{Cycle the predicted Cycle value - the computed cutoff}
  \item{Score the fitted Score value}
+ \item{status "a" for autothreshold, "f" for fixed threshold, "p" for percentile threshold}
  \item{overlap the expected overlap at the cutoff (forward cutoff len + )}
  \item{model the model as a list column (for example an lm model)}
  \item{file the name of the file}
