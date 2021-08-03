@@ -82,14 +82,19 @@ quality_profile_cutoff <- function(x = quality_profile_data(),
       # group statdf by file
       # fit Mean ~ Cycle
       # evaluate at params$Score
+      # compare to Nth quantile if user provides a value
+      # use the lesser of the two
+      full_file_names <- rep(x$files, each = nrow(x$statdf)/length(x$files)) 
       r <- x$statdf %>%
+        dplyr::mutate(file = full_file_names) %>% # we may need the full filepath in the computation
         dplyr::group_by(.data$file) %>%
         dplyr::group_map(fit_ruler, 
                          .keep = TRUE, 
                          threshold = params$score,
                          model = params$model,
                          form = form) %>%
-        dplyr::bind_rows()
+        dplyr::bind_rows() %>%
+        dplyr::mutate(file = basename(.data$file))
     } else {
       stop("method not known:", method[1])
     }
@@ -199,24 +204,25 @@ quality_profile_data <- function(
           }
         #plotdf <- cbind(df, file=basename(f))
         statdf <- dplyr::tibble(
-            Cycle=as.integer(rownames(means)),
-            Mean=means[,1],
-            Q25=as.vector(q25s),
-            Q50=as.vector(q50s),
-            Q75=as.vector(q75s),
-            Cum=10*as.vector(cums)/rc,
-            file=basename(f))
+            Cycle  = as.integer(rownames(means)),
+            Mean   = means[,1],
+            Q25    = as.vector(q25s),
+            Q50    = as.vector(q50s),
+            Q75    = as.vector(q75s),
+            Cum    = 10*as.vector(cums)/rc,
+            file   = basename(f)) 
       } # development block
       
       plotdf <- df %>%
         dplyr::mutate(file = basename(f))
-
+      
+      # annotations
       anndf <- dplyr::tibble(
-          minScore=min(df$Score),
-          label=basename(f),
-          rclabel=rclabel,
-          rc=rc,
-          file=basename(f))
+          minScore  = min(df$Score),
+          label     = basename(f),
+          rclabel   = rclabel,
+          rc        = rc,
+          file      = basename(f))
       
       list(plotdf = plotdf, statdf = statdf, anndf = anndf)
     }) # lapply through fl 
