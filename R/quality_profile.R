@@ -1,3 +1,12 @@
+#' Compute expected overlap of read pairs
+#' 
+#' @export
+#' @param f numeric, length of forward read
+#' @param r numeric, length of reverse read
+#' @param a numeric, expected amplicon length
+#' @return numeric, estimated overlap of reads
+read_overlap <- function(f = 250, r = 189, a = 400){f - (a-r)}
+
 #' Compute cutoff levels \code{trunLen} for \code{\link[dada2]{filterAndTrim}}
 #'
 #' @export
@@ -16,7 +25,6 @@
 #'  \item{Cycle the predicted Cycle value - the computed cutoff}
 #'  \item{Score the fitted Score value}
 #'  \item{status "a" for autothreshold, "f" for fixed threshold, "p" for percentile threshold}
-#'  \item{overlap the expected overlap at the cutoff (forward cutoff len + )}
 #'  \item{model the model as a list column (for example an lm model)}
 #'  \item{file the name of the file}
 #'  }
@@ -448,7 +456,7 @@ quality_profile_pairs <- function(
 
     xx <- lapply(filelist, quality_profile, n = n, aggregate = aggregate, ...)
     
-    overlap <- function(f = 250, r = 189, a = 400){f - (a-r)}
+    #overlap <- function(f = 250, r = 189, a = 400){f - (a-r)}
     
     xx[['overlap']] <- lapply(names(xx), 
       function(n){
@@ -456,7 +464,7 @@ quality_profile_pairs <- function(
         setNames(x, paste0(substring(n, 1, 1), names(x)))
         }) %>%
         dplyr::bind_cols() %>%
-        dplyr::mutate(overlap = overlap(f = .data$fCycle, r = .data$rCycle, a = amplicon_length))
+        dplyr::mutate(overlap = read_overlap(f = .data$fCycle, r = .data$rCycle, a = amplicon_length))
      
     ix <- xx[['overlap']]$overlap < min_overlap[1]
     if (any(ix)){

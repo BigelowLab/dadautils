@@ -102,7 +102,9 @@ read_fastq_paired <- function(filelist = example_filepairs()){
 #' @param nreads numeric, see \code{\link[Rsubread]{qualityScores}}
 #' @return a paired list of quality score matrices or NULL if that component of inputs is empty
 paired_quality_scores <- function(filelist = example_filepairs(), nreads = -1) {
-  sapply(filelist,
+  
+
+  rr <- sapply(filelist,
     function(files, nreads = -1){
       if (length(files) > 0){
         r <- lapply(files, 
@@ -115,6 +117,7 @@ paired_quality_scores <- function(filelist = example_filepairs(), nreads = -1) {
       }
       r
     }, nreads = nreads, simplify = FALSE)
+  rr
 }
 
 #' Compute EE per read for \code{\link[Rsubread]{qualityScores}} (one or both may be empty)
@@ -123,7 +126,7 @@ paired_quality_scores <- function(filelist = example_filepairs(), nreads = -1) {
 #' @param x paired list of quality scores as per \code{quality_scores}
 #' @param fun the function to use for summary (by default sum)
 #' @param na.rm logical, if TRUE then remove NAs before computing \code{fun}
-#' @return paried list of numeric vectors with quality per read or NULL where inputs are empty
+#' @return paired list of numeric vectors with quality per read or NULL where inputs are empty
 paired_ee_per_read <- function(x = paired_quality_scores(),
   fun = sum, na.rm = TRUE){
   
@@ -148,12 +151,26 @@ paired_ee_per_read <- function(x = paired_quality_scores(),
 #' @param x paried list of expected errors - see \code{paired_ee_per_read} (one or both may be empty)
 #' @param thresholds numeric vector of one or more thresholds
 #' @param op the comparative operator to use for the thrrsholding process (backquoted)
-#' @return a two element list of tibbles with threshold counts of errors-per-read above the threshold
-#'   or NULL where the input is empty
+#' @param form character, either 'list' (two elements, table for forward and reverse each) or "table" for a single table
+#' @param sample_names character or NULL prepends output with provided names (unless NULL)
+#' @param filename character of NULL if not NULL then write a sigle CSV to file, ignored unless \code{form} is 'table'
+#' @return a two element list of tibbles with threshold counts of errors-per-read above the threshold, or 
+#'   a single table of the two bound together by row or NULL where the input is empty
+#' @examples
+#' \dontrun{
+#'  example_filepairs() %>%
+#'    paired_quality_scores() %>%
+#'    paired_ee_per_read() %>%
+#'    paired_ee_threshold(sample_names  = c("foo", "bar"), filename = "~/my_ee_stuff.csv")
+#'  }
 paired_ee_threshold <- function(x = paired_ee_per_read(),
   thresholds = c(1,2,3,4,5),
-  op = `<=`){
-  sapply(x,
+  op = `<=`,
+  form = c("list", "table")[2],
+  sample_names = NULL,
+  filename = NULL){
+    
+  xx <- sapply(x,
     function(xx, op = `<=`){
       if (length(xx) > 0){
         r <- sapply(xx,
@@ -171,6 +188,30 @@ paired_ee_threshold <- function(x = paired_ee_per_read(),
       }
       r
     }, simplify = FALSE)
+    
+  if (!is.null(sample_names)){
+    xx <- sapply(xx,
+      function(x, sample_names = "unknown"){
+        dplyr::mutate(x, sample = sample_names) %>%
+        dplyr::relocate(sample, .before = 1)
+      }, 
+      simplify = FALSE,
+      sample_names = sample_names)
+  }
+  
+  if (tolower(form[1]) == "table"){
+    xx <- sapply(names(xx),
+      function(name){
+        dplyr::mutate(xx[[name]], direction = name) %>%
+        dplyr::relocate(direction, .before = 1)
+      }, simplify = FALSE) %>%
+      dplyr::bind_rows()
+      
+      if (!is.null(filename[1])) {
+        xx <- readr::write_csv(xx, filename[1])
+      }
+  }
+  xx
 }
 
 
