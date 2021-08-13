@@ -6,7 +6,7 @@
 #' @param compress logical, see \code{\link[dada2]{filterAndTrim}}
 #' @param multithread numeric, the number of cores to use. Defaults to \code{\link{count_cores}}
 #' @param truncLen character or numeric.  If character and "auto" then auto-compute trunLen, default "auto"
-#' @param cutoff_params list, in the even that trunLen is "auto" then pass these params to 
+#' @param cutoff_params list, in the event that trunLen is "auto" then pass these params to 
 #'    \code{\link{quality_profile_cutoff}}
 #' @param ... other arguments for \code{\link[dada2]{filterAndTrim}}
 #' @param save_results logical, save CSV if TRUE

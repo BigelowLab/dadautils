@@ -60,23 +60,27 @@ quality_profile_cutoff <- function(x = quality_profile_data(),
           dplyr::mutate(model = list(f), 
                         file = x1$file,
                         status = "a")
-                        
+         
+        ix <- which(findInterval(p$Score, threshold[1]) > 0)
+        ix <- ix[length(ix)]
+                       
         if (tolower(form[1]) == "reduced"){
-          
           if (!is.na(quantile_min[1])){
-            # here we select those at or below the 90th percentile 
+            # compute the quantile
+            # transform trunLen to an index (into Cycle dimension)
+            # compare to ruler method
+            # select more permissive trunLen of the two
             q_min <- ShortRead::readFastq(x1$file) %>%
               ShortRead::width() %>%
               stats::quantile(probs = quantile_min[1], names = FALSE)
-            ix <- which(p$Cycle <= q_min)
-            ix <- ix[length(ix)]
-            p <- p %>%
-              dplyr::mutate(status = sprintf("p_%0.2f", quantile_min[1]))
-          } else {
-            # here we use the automated cutoff
-            ix <- which(findInterval(p$Score, threshold[1]) > 0)
-            ix <- ix[length(ix)]
-          }
+            iy <- which(p$Cycle <= q_min)
+            iy <- iy[length(iy)]
+            if (iy < ix){
+              ix <- iy      # replace the truncLen - update status
+              p <- p %>%
+                dplyr::mutate(status = sprintf("p_%0.2f", quantile_min[1]))
+            }
+          } 
           
           p <- p %>%
             dplyr::slice(ix)
@@ -96,6 +100,7 @@ quality_profile_cutoff <- function(x = quality_profile_data(),
                          .keep = TRUE, 
                          threshold = params$score,
                          model = params$model,
+                         quantile = params$quantile_min,
                          form = form) %>%
         dplyr::bind_rows() %>%
         dplyr::mutate(file = basename(.data$file))

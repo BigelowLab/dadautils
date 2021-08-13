@@ -30,7 +30,7 @@ filter_and_trim(
 
 \item{truncLen}{character or numeric.  If character and "auto" then auto-compute trunLen, default "auto"}
 
-\item{cutoff_params}{list, in the even that trunLen is "auto" then pass these params to 
+\item{cutoff_params}{list, in the event that trunLen is "auto" then pass these params to 
 \code{\link{quality_profile_cutoff}}}
 
 \item{verbose}{logical, if TRUE output informational messages}
