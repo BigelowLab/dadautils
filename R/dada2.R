@@ -252,19 +252,18 @@ count_uniques <- function(x, ...){
 #' @export
 #' @param x a list with file pairings as character vectors
 #' @param n integer, the number of profiles (forward and reverse) to plot
-#' @param ofile character, the name of the output PDF file
+#' @param filename character, the name of the output PDF file or NULL to skip file handling
 plot_qualityProfiles <- function(x,
   n = 2,
-  ofile = "quality_profiles.pdf"){
+  filename = "quality_profiles.pdf"){
 
   norev <- length(x$reverse) == 0
   ix <- seq_len(n)
-  pdf(ofile)
+  if (!charlier::is.nullna(filename[1])) { grDevices::pdf(filename) }
   print(dadautils::plot_qualityProfile(x$forward[ix]), filename = NA)
   if (!norev) print(dadautils::plot_qualityProfile(x$reverse[ix]), filename = NA)
-  dev.off()
+  if (!charlier::is.nullna(filename[1]) ){ grDevices::dev.off() }
 }
-
 
 
 #' Plot quality profiles for one or more FASTQs
@@ -276,9 +275,9 @@ plot_qualityProfiles <- function(x,
 plot_qualityProfile <- function(x,
   filename = c(NA, "qualityProfile.pdf")[1],
   ...){
-  if (!is.na(filename[1])) grDevices::pdf(filename[1])
+  if (!charlier::is.nullna(filename[1])) grDevices::pdf(filename[1])
   ok <- dada2::plotQualityProfile(x, ...)
-  if (!is.na(filename[1])) grDevices::dev.off()
+  if (!charlier::is.nullna(filename[1])) grDevices::dev.off()
   ok
 }
 
