@@ -39,7 +39,13 @@ quality_profile_cutoff <- function(x = quality_profile_data(),
   method = "ruler",
   params = list(score = 30, model = "Mean ~ poly(Cycle, 2)", quantile_min = 0.99),
   form = c("full", "reduced")[2]){
-   
+  
+    if (FALSE){
+      method = "ruler"
+      params = list(score = 30, model = "Mean ~ poly(Cycle, 2)", quantile_min = 0.99)
+      form = c("full", "reduced")[2]
+    }
+  
     r <- NULL
     if (tolower(method[1]) == "ruler"){
       
@@ -73,7 +79,7 @@ quality_profile_cutoff <- function(x = quality_profile_data(),
         ix <- ix[length(ix)]
                        
         if (tolower(form[1]) == "reduced"){
-          if (!is.na(quantile_min[1])){
+          if (!charlier::is.nullna(quantile_min[1])){
             # compute the quantile
             # transform trunLen to an index (into Cycle dimension)
             # compare to ruler method
@@ -82,7 +88,11 @@ quality_profile_cutoff <- function(x = quality_profile_data(),
               ShortRead::width() %>%
               stats::quantile(probs = quantile_min[1], names = FALSE)
             iy <- which(p$Cycle <= q_min)
-            iy <- iy[length(iy)]
+            if (length(iy) > 0){
+              iy <- iy[length(iy)]
+            } else {
+              
+            }
             if (iy < ix){
               ix <- iy      # replace the truncLen - update status
               p <- p %>%
@@ -100,9 +110,15 @@ quality_profile_cutoff <- function(x = quality_profile_data(),
       # evaluate at params$Score
       # compare to Nth quantile if user provides a value
       # use the lesser of the two
-      full_file_names <- rep(x$files, each = nrow(x$statdf)/length(x$files)) 
+      
+      # make full filenames for subsequent ShortRead::qa() 
+      # the number if cycles per file may vary, so we need to use a per-file LUT 
+      # to cionnect full file path spec for each row in statdf
+      full_file_names <- x$files
+      names(full_file_names) <- basename(full_file_names)
+      
       r <- x$statdf %>%
-        dplyr::mutate(file = full_file_names) %>% # we may need the full filepath in the computation
+        dplyr::mutate(file = full_file_names[.data$file]) %>% # we may need the full filepath in the computation
         dplyr::group_by(.data$file) %>%
         dplyr::group_map(fit_ruler, 
                          .keep = TRUE, 

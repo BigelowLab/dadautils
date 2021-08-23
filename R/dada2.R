@@ -22,6 +22,16 @@ filter_and_trim <- function(filelist,
                             verbose = FALSE, 
                             ...){
 
+  if(FALSE){
+    output_path = file.path(dirname(filelist$forward[1]),'filterAndTrim')
+    save_results = FALSE
+    compress = TRUE
+    multithread = charlier::count_cores()
+    truncLen = "auto"
+    cutoff_params = list(score = 30, model = "Mean ~ poly(Cycle, 2)", quantile_min = 0.99)
+    verbose = FALSE
+  }
+
   ffilt <- file.path(output_path, basename(filelist$forward))
   
   norev <- length(filelist$reverse) == 0
