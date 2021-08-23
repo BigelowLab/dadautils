@@ -13,7 +13,9 @@ quality_profile_pairs(
   aggregate = FALSE,
   amplicon_length = 400,
   min_overlap = 20,
-  overlap_file = file.path(dirname(filelist$forward[1]), "overlap.csv"),
+  plot_filename = file.path(dirname(dirname(filelist$forward[1])),
+    "quality_profiles.pdf"),
+  overlap_filename = file.path(dirname(dirname(filelist$forward[1])), "overlap.csv"),
   ...
 )
 }
@@ -30,7 +32,10 @@ If TRUE, compute an aggregate quality profile for all fastq files provided.}
 
 \item{min_overlap}{numeric, issue warnings for any overlap less than this value}
 
-\item{overlap_file}{character or NULL, if provided save the overlap table to this file as CSV
+\item{plot_filename}{character or NULL, if provided save the quality profile plots as PDF
+NULL to skip writing the file}
+
+\item{overlap_filename}{character or NULL, if provided save the overlap table to this file as CSV
 NULL to skip writing the file}
 
 \item{...}{arguments for \code{\link{quality_profile_cutoff}}}

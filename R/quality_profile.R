@@ -162,6 +162,13 @@ quality_profile_data <- function(
     aggregate <- FALSE
   }
   
+  if (!inherits(fl, "character")){
+    if (is.list(fl) && all(names(fl) %in% c("forward", "reverse"))) stop("input is a list, did you mean to call quality_profile_pairs()?")
+    stop("Input must be vector of file names")
+  } else{
+    if (!all(file.exists(fl))) stop("one or more files in input not found") 
+  }
+  
   # retrieve quantile (xx value) where yy quantile is at or above q
   get_quant <- function(xx, yy, q) { xx[which(cumsum(yy)/sum(yy) >= q)][[1]] }
   
@@ -484,7 +491,9 @@ quality_profile <- function(
 #'        If TRUE, compute an aggregate quality profile for all fastq files provided.
 #' @param amplicon_length numeric, the expected amplicon length, used to compute expected overlap
 #' @param min_overlap numeric, issue warnings for any overlap less than this value 
-#' @param overlap_file character or NULL, if provided save the overlap table to this file as CSV
+#' @param plot_filename character or NULL, if provided save the quality profile plots as PDF
+#'   NULL to skip writing the file
+#' @param overlap_filename character or NULL, if provided save the overlap table to this file as CSV
 #'   NULL to skip writing the file
 #' @param ... arguments for \code{\link{quality_profile_cutoff}}
 #' @return complex list of forward, reverse and merged quality stats 
@@ -498,8 +507,8 @@ quality_profile_pairs <- function(
   aggregate = FALSE, 
   amplicon_length = 400,
   min_overlap = 20, 
-  plot_filename = file.path(dirname(filelist$forward[1]), "quality_profiles.pdf"),
-  overlap_filename = file.path(dirname(filelist$forward[1]), "overlap.csv"),
+  plot_filename = file.path(dirname(dirname(filelist$forward[1])), "quality_profiles.pdf"),
+  overlap_filename = file.path(dirname(dirname(filelist$forward[1])), "overlap.csv"),
   ...){
 
     if (FALSE){

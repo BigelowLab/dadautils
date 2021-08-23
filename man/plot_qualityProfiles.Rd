@@ -5,14 +5,14 @@
 \title{Plot a suite of quality profiles. Similar to \code{\link{plot_qualityProfile}}
 but works with paired forward/reverse files.}
 \usage{
-plot_qualityProfiles(x, n = 2, ofile = "quality_profiles.pdf")
+plot_qualityProfiles(x, n = 2, filename = "quality_profiles.pdf")
 }
 \arguments{
 \item{x}{a list with file pairings as character vectors}
 
 \item{n}{integer, the number of profiles (forward and reverse) to plot}
 
-\item{ofile}{character, the name of the output PDF file}
+\item{filename}{character, the name of the output PDF file or NULL to skip file handling}
 }
 \description{
 Plot a suite of quality profiles. Similar to \code{\link{plot_qualityProfile}}

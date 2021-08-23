@@ -7,7 +7,10 @@
 paired_ee_threshold(
   x = paired_ee_per_read(),
   thresholds = c(1, 2, 3, 4, 5),
-  op = `<=`
+  op = `<=`,
+  form = c("list", "table")[2],
+  sample_names = NULL,
+  filename = NULL
 )
 }
 \arguments{
@@ -16,11 +19,25 @@ paired_ee_threshold(
 \item{thresholds}{numeric vector of one or more thresholds}
 
 \item{op}{the comparative operator to use for the thrrsholding process (backquoted)}
+
+\item{form}{character, either 'list' (two elements, table for forward and reverse each) or "table" for a single table}
+
+\item{sample_names}{character or NULL prepends output with provided names (unless NULL)}
+
+\item{filename}{character of NULL if not NULL then write a sigle CSV to file, ignored unless \code{form} is 'table'}
 }
 \value{
-a two element list of tibbles with threshold counts of errors-per-read above the threshold
-  or NULL where the input is empty
+a two element list of tibbles with threshold counts of errors-per-read above the threshold, or 
+  a single table of the two bound together by row or NULL where the input is empty
 }
 \description{
 Threshold paired expected error computations
+}
+\examples{
+\dontrun{
+ example_filepairs() \%>\%
+   paired_quality_scores() \%>\%
+   paired_ee_per_read() \%>\%
+   paired_ee_threshold(sample_names  = c("foo", "bar"), filename = "~/my_ee_stuff.csv")
+ }
 }

@@ -237,7 +237,7 @@ paired_ee_threshold <- function(x = paired_ee_per_read(),
     xx <- sapply(names(xx),
       function(name){
         dplyr::mutate(xx[[name]], direction = name) %>%
-        dplyr::relocate(direction, .before = 1)
+        dplyr::relocate(.data$direction, .before = 1)
       }, simplify = FALSE) %>%
       dplyr::bind_rows()
       
