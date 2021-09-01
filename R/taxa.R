@@ -48,7 +48,7 @@ assign_taxonomy <- function(seqs,
       x <- x[, !ix, drop = FALSE]
     }
     if (save_file){
-      if (length(x) == 2 && "tax" %in% names(x)){
+      if (is.list(x) && "tax" %in% names(x)){
         readr::write_csv(x$tax %>% dplyr::as_tibble(), filename)
       } else {
         readr::write_csv(x %>% dplyr::as_tibble(), filename)
