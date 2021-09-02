@@ -1,3 +1,37 @@
+#' Verify taxa levels match depoth of taxa in reference database.
+#'
+#' Verification is by comparing count of taxa levels with the first line in reference
+#' database which, in dada2-world, is a delimited list of levels.
+#'
+#' @export
+#' @param taxaLevels character, vector fo desired taxa levels
+#' @param refFasta character, filename of the refernce database
+#' @param delim character, the delimiter used to split the first contig description line in the refFasta
+#' @return logical TRUE if taxaLevels and refdb have the same depth of classifications
+verify_taxalevels <- function(taxaLevels, refFasta, delim = ";"){
+  
+  stopifnot(inherits(taxaLevels, "character"))
+  stopifnot(inherits(refFasta, "character"))
+  
+  
+  if (!file.exists(refFasta[1])) stop("refFasta not found:", refFasta[1])
+  s <- readLines(refFasta, n = 1)
+  s <- strsplit(s, delim[1])[[1]]
+  
+  nt <- length(taxaLevels)
+  ns <- length(s)
+  
+  if (nt > ns){
+    warning("number of taxaLevels is greater than those provided in refFasta")
+  }
+  if (nt < ns){
+    warning("number of taxaLevels is less than than those provided in refFasta")
+  }
+  
+  return(length(s) == length())
+}
+
+
 #' A wrapper around assign_taxonomy that optionally populates otherwise truncated 
 #' taxonomy levels when running straight up \code{\link[dada2]{assignTaxonomy}}.
 #' 
