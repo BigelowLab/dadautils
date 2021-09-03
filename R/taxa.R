@@ -4,13 +4,13 @@
 #' database which, in dada2-world, is a delimited list of levels.
 #'
 #' @export
-#' @param taxaLevels character, vector fo desired taxa levels
-#' @param refFasta character, filename of the refernce database
+#' @param taxLevels character, vector of desired taxa levels
+#' @param refFasta character, filename of the reference database
 #' @param delim character, the delimiter used to split the first contig description line in the refFasta
-#' @return logical TRUE if taxaLevels and refdb have the same depth of classifications
-verify_taxalevels <- function(taxaLevels, refFasta, delim = ";"){
+#' @return logical TRUE if taxLevels and refdb have the same depth of classifications
+verify_taxalevels <- function(taxLevels, refFasta, delim = ";"){
   
-  stopifnot(inherits(taxaLevels, "character"))
+  stopifnot(inherits(taxLevels, "character"))
   stopifnot(inherits(refFasta, "character"))
   
   
@@ -18,14 +18,14 @@ verify_taxalevels <- function(taxaLevels, refFasta, delim = ";"){
   s <- readLines(refFasta, n = 1)
   s <- strsplit(s, delim[1])[[1]]
   
-  nt <- length(taxaLevels)
+  nt <- length(taxLevels)
   ns <- length(s)
   
   if (nt > ns){
-    warning("number of taxaLevels is greater than those provided in refFasta")
+    warning("number of taxLevels is greater than those provided in refFasta")
   }
   if (nt < ns){
-    warning("number of taxaLevels is less than than those provided in refFasta")
+    warning("number of taxLevels is less than than those provided in refFasta")
   }
   
   return(length(s) == length())

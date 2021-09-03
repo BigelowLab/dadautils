@@ -7,6 +7,7 @@ taxonomy levels when running straight up \code{\link[dada2]{assignTaxonomy}}.}
 \usage{
 assign_taxonomy(
   seqs,
+  refFasta = NULL,
   taxLevels = c("Kingdom", "Phylum", "Class", "Order", "Family", "Genus", "Species"),
   populate_truncated = TRUE,
   truncated_value = NA_character_,
@@ -18,6 +19,8 @@ assign_taxonomy(
 }
 \arguments{
 \item{seqs}{character, see \code{\link[dada2]{assignTaxonomy}}}
+
+\item{refFasta}{filename, a the fully qualified filename to to the reference database}
 
 \item{taxLevels}{character, \code{\link[dada2]{assignTaxonomy}}}
 
@@ -42,6 +45,7 @@ see \code{\link[dada2]{assignTaxonomy}}}
 character matrix
 }
 \description{
-A wrapper around assign_taxonomy that optionally populates otherwise truncated 
-taxonomy levels when running straight up \code{\link[dada2]{assignTaxonomy}}.
+We compare the number of available levels in the reference database with the number of 
+  levels in the user specified \code{taxLevels}.  We issue a warning if they are not the same but
+  we do not throw an error.
 }
