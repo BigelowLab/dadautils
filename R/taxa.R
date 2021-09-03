@@ -15,7 +15,7 @@ verify_taxalevels <- function(taxLevels, refFasta, delim = ";"){
   
   
   if (!file.exists(refFasta[1])) stop("refFasta not found:", refFasta[1])
-  s <- readLines(refFasta, n = 1)
+  s <- readLines(refFasta[1], n = 1)
   s <- strsplit(s, delim[1])[[1]]
   
   nt <- length(taxLevels)
@@ -28,7 +28,8 @@ verify_taxalevels <- function(taxLevels, refFasta, delim = ";"){
     warning("number of taxLevels is less than than those provided in refFasta")
   }
   
-  return(length(s) == length())
+  nt==ns
+  #return(length(s) == length())
 }
 
 
