@@ -35,8 +35,13 @@ verify_taxalevels <- function(taxaLevels, refFasta, delim = ";"){
 #' A wrapper around assign_taxonomy that optionally populates otherwise truncated 
 #' taxonomy levels when running straight up \code{\link[dada2]{assignTaxonomy}}.
 #' 
+#' We compare the number of available levels in the reference database with the number of 
+#'   levels in the user specified \code{taxLevels}.  We issue a warning if they are not the same but
+#'   we do not throw an error.
+#'
 #' @export
 #' @param seqs character, see \code{\link[dada2]{assignTaxonomy}}
+#' @param refFasta filename, a the fully qualified filename to to the reference database
 #' @param taxLevels character, \code{\link[dada2]{assignTaxonomy}}
 #' @param populate_truncated logical, if TRUE make sure each level of \code{taxLevel} is 
 #' represented in the returned value
@@ -51,6 +56,7 @@ verify_taxalevels <- function(taxaLevels, refFasta, delim = ";"){
 #' @param ... further arguments for \code{\link[dada2]{assignTaxonomy}}
 #' @return character matrix
 assign_taxonomy <- function(seqs, 
+  refFasta = NULL,
   taxLevels = c("Kingdom", "Phylum", "Class", "Order", "Family", "Genus", "Species"),
   populate_truncated = TRUE,
   truncated_value = NA_character_,
@@ -59,7 +65,12 @@ assign_taxonomy <- function(seqs,
   filename = "taxa.csv",
   ...){
   
-    x <- dada2::assignTaxonomy(seqs, taxLevels = taxLevels, ...)  
+    if (is.null(refFasta)) stop("refFasta is required")
+      
+    # here we chack that the levels are the same - we warn but do not throw an error
+    ok <- verify_taxalevels(taxLevels, refFasta)
+    
+    x <- dada2::assignTaxonomy(seqs, refFasta, taxLevels = taxLevels, ...)  
     if (populate_truncated){
       if (length(x) == 2 && "tax" %in% names(x)){
         x <- x$tax
