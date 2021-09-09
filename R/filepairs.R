@@ -120,7 +120,7 @@ read_fastq_paired <- function(filelist = example_filepairs()){
   sapply(filelist,
       function(x){
         if (length(x) > 0){
-          r <- lapply(x, ShortRead::readFastq) %>%
+          r <- parallel::mclapply(x, ShortRead::readFastq) %>%
             setNames(basename(x))
         } else {
             r <- NULL
@@ -137,11 +137,10 @@ read_fastq_paired <- function(filelist = example_filepairs()){
 #' @return a paired list of quality score matrices or NULL if that component of inputs is empty
 paired_quality_scores <- function(filelist = example_filepairs(), nreads = -1) {
   
-
   rr <- sapply(filelist,
     function(files, nreads = -1){
       if (length(files) > 0){
-        r <- lapply(files, 
+        r <- parallel::mclapply(files, 
           function(file, nreads = -1) {
             Rsubread::qualityScores(file, nreads = nreads)
           }, nreads = nreads) %>%

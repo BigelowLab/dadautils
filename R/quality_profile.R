@@ -1,3 +1,46 @@
+#' Retrieve statistics from a FastQ file
+#'
+#' @export
+#' @param filename character, one or more filenames
+#' @param n (Optional). Default 500,000.
+#'        The number of records to sample from the fastq file.
+#' @return tibble 
+#'   \describe{
+#'      \item{filename}{character, the name of the file}
+#'      \item{nread numeric}{the number of reads in the file}
+#'      \item{ncycle}{list column of numeric vectors, the number of cycles per read}
+#'      \item{quantile_cycles}{list columns of numeric vector, quantiles of ncycles from 0.01 to 0.99 by 0.01}
+#'      \item{per_cycle_quality}{list columns of tibbles, quality per cycle metrics}
+#'    }
+fastq_stats <- function(filename = unname(unlist(example_filepairs())) , n = 500000){
+  
+  if (length(filename) > 1) {
+    r <- parallel::mclapply(filename, fastq_stats, n = n) %>%
+      dplyr::bind_rows()
+    return(r)
+  }
+  
+  stopifnot(file.exists(filename[1]))
+  x <- try(ShortRead::readFastq(filename[1]))
+  if (inherits(x, "try-error")){
+    print(x)
+    return(NULL)
+  }
+  
+  w <- x %>%
+      ShortRead::width()
+      
+  srqa <- ShortRead::qa(list(x) %>% setNames(basename(filename[1])), n = n)
+    
+  dplyr::tibble(filename = filename[1], 
+       nread = length(x),
+       ncycles = list(w),
+       quantile_cycles = list(quantile(w, probs = seq(from = 0.01, to = 0.99, by = 0.01))),
+       per_cycle_quality = list(srqa[["perCycle"]]$quality %>% dplyr::as_tibble()))
+}
+
+
+
 #' Compute expected overlap of read pairs
 #' 
 #' @export
@@ -145,6 +188,13 @@ quality_profile_cutoff <- function(x = quality_profile_data(),
 #' @seealso \code{\link[dada2]{plotQualityProfile}}
 #' @param fl (Required). \code{character}.
 #'        File path(s) to fastq or fastq.gz file(s).
+#' @param per_input_file_stats list or NULL, if a list then one element per inpout file.  Each element
+#'   should contain
+#' \itemize{
+#'  \item{count, the number of reads}
+#'  \item{ncycles, the number of cycles per read (width)}
+#'  \item{perCycleQuality, tibble - see ShortRead::qa()$perCycle$quality}
+#' } 
 #' @param n (Optional). Default 500,000.
 #'        The number of records to sample from the fastq file.
 #' @param aggregate (Optional). Default \code{FALSE}.
@@ -169,6 +219,7 @@ quality_profile_cutoff <- function(x = quality_profile_data(),
 quality_profile_data <- function(
   fl = c(system.file("extdata", "sam1F.fastq.gz", package="dada2"),
          system.file("extdata", "sam1R.fastq.gz", package="dada2")), 
+         per_input_file_stats = NULL, 
          n = 500000, aggregate = FALSE){
   
   if (FALSE){

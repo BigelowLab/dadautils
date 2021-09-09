@@ -7,6 +7,7 @@
 quality_profile_data(
   fl = c(system.file("extdata", "sam1F.fastq.gz", package = "dada2"),
     system.file("extdata", "sam1R.fastq.gz", package = "dada2")),
+  per_input_file_stats = NULL,
   n = 5e+05,
   aggregate = FALSE
 )
@@ -14,6 +15,14 @@ quality_profile_data(
 \arguments{
 \item{fl}{(Required). \code{character}.
 File path(s) to fastq or fastq.gz file(s).}
+
+\item{per_input_file_stats}{list or NULL, if a list then one element per inpout file.  Each element
+  should contain
+\itemize{
+ \item{count, the number of reads}
+ \item{ncycles, the number of cycles per read (width)}
+ \item{perCycleQuality, tibble - see ShortRead::qa()$perCycle$quality}
+}}
 
 \item{n}{(Optional). Default 500,000.
 The number of records to sample from the fastq file.}

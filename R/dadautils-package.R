@@ -9,7 +9,7 @@
 #' @importFrom dplyr %>%
 #' @importFrom grDevices dev.off pdf
 #' @importFrom utils installed.packages write.csv
-#' @importFrom stats setNames lm predict as.formula
+#' @importFrom stats setNames lm predict as.formula quantile
 NULL
 
 #' Deprecated functions in dadautils

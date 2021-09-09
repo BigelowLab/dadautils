@@ -4,17 +4,17 @@
 \alias{verify_taxalevels}
 \title{Verify taxa levels match depoth of taxa in reference database.}
 \usage{
-verify_taxalevels(taxaLevels, refFasta, delim = ";")
+verify_taxalevels(taxLevels, refFasta, delim = ";")
 }
 \arguments{
-\item{taxaLevels}{character, vector fo desired taxa levels}
+\item{taxLevels}{character, vector of desired taxa levels}
 
-\item{refFasta}{character, filename of the refernce database}
+\item{refFasta}{character, filename of the reference database}
 
 \item{delim}{character, the delimiter used to split the first contig description line in the refFasta}
 }
 \value{
-logical TRUE if taxaLevels and refdb have the same depth of classifications
+logical TRUE if taxLevels and refdb have the same depth of classifications
 }
 \description{
 Verification is by comparing count of taxa levels with the first line in reference
