@@ -7,8 +7,8 @@
 quality_profile_data(
   fl = c(system.file("extdata", "sam1F.fastq.gz", package = "dada2"),
     system.file("extdata", "sam1R.fastq.gz", package = "dada2")),
-  per_input_file_stats = NULL,
   n = 5e+05,
+  stats = fastq_stats(fl, n = n),
   aggregate = FALSE
 )
 }
@@ -16,16 +16,11 @@ quality_profile_data(
 \item{fl}{(Required). \code{character}.
 File path(s) to fastq or fastq.gz file(s).}
 
-\item{per_input_file_stats}{list or NULL, if a list then one element per inpout file.  Each element
-  should contain
-\itemize{
- \item{count, the number of reads}
- \item{ncycles, the number of cycles per read (width)}
- \item{perCycleQuality, tibble - see ShortRead::qa()$perCycle$quality}
-}}
-
 \item{n}{(Optional). Default 500,000.
 The number of records to sample from the fastq file.}
+
+\item{stats}{list of two elements (forward and reverse) with output
+of \code{\link{fastq_stats}}}
 
 \item{aggregate}{(Optional). Default \code{FALSE}.
 If TRUE, compute an aggregate quality profile for all fastq files provided.}
@@ -40,6 +35,7 @@ as list with the following elements
   \item{plotdf} table of stats transformed for plotting
   \item{plotdf.summary} table of plot data for plotting (NULL if aggregate is \code{FALSE})
   \item{statdf.summary} table of summary stats for plotting  (NULL if aggregate is \code{FALSE})
+  \item{quality_stats} per file quality stats as per \code{\link{fastq_stats}}
 }
 }
 \description{

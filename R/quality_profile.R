@@ -98,14 +98,17 @@ quality_profile_cutoff <- function(x = quality_profile_data(),
       # threshold - where the ruler is placed in Quality Score values
       # model - model as formula or character to be cast as formula
       # form character (if 'reduced' then retrive just the place where the cutoff occurs)
+      # qstat as per \code{fastq_stats}
       fit_ruler <- function(x1, key, 
                             threshold = 30, 
                             quantile_min = 0.9, 
                             model = stats::as.formula("Mean ~ poly(Cycle, 2)"),
-                            form = "reduced"){
+                            form = "reduced",
+                            qstat = fastq_stats(x1$file)){
         if (!inherits(model, "formula")) model <- as.formula(model)
           
-        
+        qstat <- qstat %>%
+          dplyr::filter(.data$filename == x1$file)
             
         f <- lm(model, data = x1)
         p <- predict(f) %>% 
@@ -127,14 +130,16 @@ quality_profile_cutoff <- function(x = quality_profile_data(),
             # transform trunLen to an index (into Cycle dimension)
             # compare to ruler method
             # select more permissive trunLen of the two
-            q_min <- ShortRead::readFastq(x1$file) %>%
-              ShortRead::width() %>%
-              stats::quantile(probs = quantile_min[1], names = FALSE)
+
+            #q_min <- ShortRead::readFastq(x1$file) %>%
+            #  ShortRead::width() %>%
+            #  stats::quantile(probs = quantile_min[1], names = FALSE)
+            q_min <- qstat$quantiles_cycle[sprintf("%i%%", quantile_min*100)]
             iy <- which(p$Cycle <= q_min)
             if (length(iy) > 0){
               iy <- iy[length(iy)]
             } else {
-              
+              # ????? what happens here?
             }
             if (iy < ix){
               ix <- iy      # replace the truncLen - update status
@@ -147,7 +152,9 @@ quality_profile_cutoff <- function(x = quality_profile_data(),
             dplyr::slice(ix)
         }
         p
-      }
+      } # fit ruler
+      
+      
       # group statdf by file
       # fit Mean ~ Cycle
       # evaluate at params$Score
@@ -168,7 +175,8 @@ quality_profile_cutoff <- function(x = quality_profile_data(),
                          threshold = params$score,
                          model = params$model,
                          quantile = params$quantile_min,
-                         form = form) %>%
+                         form = form,
+                         qstat = x$qstat) %>%
         dplyr::bind_rows() %>%
         dplyr::mutate(file = basename(.data$file))
     } else {
@@ -188,13 +196,8 @@ quality_profile_cutoff <- function(x = quality_profile_data(),
 #' @seealso \code{\link[dada2]{plotQualityProfile}}
 #' @param fl (Required). \code{character}.
 #'        File path(s) to fastq or fastq.gz file(s).
-#' @param per_input_file_stats list or NULL, if a list then one element per inpout file.  Each element
-#'   should contain
-#' \itemize{
-#'  \item{count, the number of reads}
-#'  \item{ncycles, the number of cycles per read (width)}
-#'  \item{perCycleQuality, tibble - see ShortRead::qa()$perCycle$quality}
-#' } 
+#' @param stats list of two elements (forward and reverse) with output
+#'   of \code{\link{fastq_stats}}
 #' @param n (Optional). Default 500,000.
 #'        The number of records to sample from the fastq file.
 #' @param aggregate (Optional). Default \code{FALSE}.
@@ -208,6 +211,7 @@ quality_profile_cutoff <- function(x = quality_profile_data(),
 #'   \item{plotdf} table of stats transformed for plotting
 #'   \item{plotdf.summary} table of plot data for plotting (NULL if aggregate is \code{FALSE})
 #'   \item{statdf.summary} table of summary stats for plotting  (NULL if aggregate is \code{FALSE})
+#'   \item{quality_stats} per file quality stats as per \code{\link{fastq_stats}}
 #' }
 #' @examples
 #' \dontrun{
@@ -219,8 +223,9 @@ quality_profile_cutoff <- function(x = quality_profile_data(),
 quality_profile_data <- function(
   fl = c(system.file("extdata", "sam1F.fastq.gz", package="dada2"),
          system.file("extdata", "sam1R.fastq.gz", package="dada2")), 
-         per_input_file_stats = NULL, 
-         n = 500000, aggregate = FALSE){
+  n = 500000, 
+  stats = fastq_stats(fl, n = n), 
+  aggregate = FALSE){
   
   if (FALSE){
     fl <- c(system.file("extdata", "sam1F.fastq.gz", package="dada2"),
@@ -255,13 +260,23 @@ quality_profile_data <- function(
       setNames(c("Cycle", sprintf("Q%i", qs*100), "Cum", "Mean"))
   }
   
+  
+  
   # compute per file
   xx <- lapply(fl,
     function(f){
-      srqa <- ShortRead::qa(f, n = n)
-      df <- srqa[["perCycle"]]$quality %>%
-        dplyr::as_tibble()
-      rc <- sum(srqa[["readCounts"]]$read) # Handle aggregate form from qa of a directory
+      
+      s <- stats %>%
+        dplyr::filter(.data$filename == f)
+      df <- (s %>%
+        dplyr::pull(.data$per_cycle_quality))[[1]]
+      rc <- s$nread 
+      
+      #srqa <- ShortRead::qa(f, n = n)
+      #df <- srqa[["perCycle"]]$quality %>%
+      #  dplyr::as_tibble()
+      #rc <- sum(srqa[["readCounts"]]$read) # Handle aggregate form from qa of a directory
+      
       if (rc >= n) {
         rclabel <- paste("Reads >= ", n)
       } else {
@@ -356,7 +371,8 @@ quality_profile_data <- function(
          statdf = statdf, 
          anndf = anndf, 
          plotdf.summary = plotdf.summary,
-         statdf.summary = statdf.summary)
+         statdf.summary = statdf.summary,
+         quality_stats = stats)
 }
 
 
