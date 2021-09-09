@@ -104,7 +104,8 @@ quality_profile_cutoff <- function(x = quality_profile_data(),
                             quantile_min = 0.9, 
                             model = stats::as.formula("Mean ~ poly(Cycle, 2)"),
                             form = "reduced",
-                            qstat = fastq_stats(x1$file)){
+                            qstat = NULL){
+                            #qstat = fastq_stats(x1$file)){
         if (!inherits(model, "formula")) model <- as.formula(model)
           
         qstat <- qstat %>%
