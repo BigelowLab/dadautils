@@ -177,7 +177,7 @@ quality_profile_cutoff <- function(x = quality_profile_data(),
                          model = params$model,
                          quantile = params$quantile_min,
                          form = form,
-                         qstat = x$qstat) %>%
+                         qstat = x$quality_stats) %>%
         dplyr::bind_rows() %>%
         dplyr::mutate(file = basename(.data$file))
     } else {
