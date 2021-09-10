@@ -106,10 +106,19 @@ quality_profile_cutoff <- function(x = quality_profile_data(),
                             form = "reduced",
                             qstat = NULL){
                             #qstat = fastq_stats(x1$file)){
+                              
+                              
+        if (FALSE){
+          threshold = 30 
+          quantile_min = 0.9 
+          model = stats::as.formula("Mean ~ poly(Cycle, 2)")
+          form = "reduced"
+          #qstat = fastq_stats(x1$file)
+        }
         if (!inherits(model, "formula")) model <- as.formula(model)
           
         qstat <- qstat %>%
-          dplyr::filter(.data$filename == x1$file)
+          dplyr::filter(.data$filename == x1$file[1])
             
         f <- lm(model, data = x1)
         p <- predict(f) %>% 
@@ -135,7 +144,7 @@ quality_profile_cutoff <- function(x = quality_profile_data(),
             #q_min <- ShortRead::readFastq(x1$file) %>%
             #  ShortRead::width() %>%
             #  stats::quantile(probs = quantile_min[1], names = FALSE)
-            q_min <- qstat$quantiles_cycle[sprintf("%i%%", quantile_min*100)]
+            q_min <- qstat$quantile_cycles[[1]][sprintf("%i%%", quantile_min*100)]
             iy <- which(p$Cycle <= q_min)
             if (length(iy) > 0){
               iy <- iy[length(iy)]
