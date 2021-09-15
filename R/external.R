@@ -28,7 +28,7 @@ run_cutadapt <- function(
   OK <- sapply(seq_along(cut_files$forward),
     function(i){
       if (save_output){
-        ofile <- paste0(strip_extension(cut_files$forward[i]), ".cutadapt_output.txt")
+        ofile <- paste0(charlier::strip_extension(cut_files$forward[i]), ".cutadapt_output.txt")
       } else {
         ofile <- ""
       }

@@ -44,6 +44,45 @@ read_RDS <- function(file, ...){
 }
 
 
+#' Write errors object
+#'
+#' @export
+#' @param x errors object from \code{\link{learn_errors}}
+#' @param filename the name of the file to write
+#' @return the input errors object
+write_errors <- function(x, filename = "learn_errors.rds"){
+  charlier::write_RDS(x, filename)
+}
+
+#' Read errors object
+#'
+#' @export
+#' @param filename the name of the file to read
+#' @return errors object
+read_errors <- function(filename = "learn_errors.rds"){
+  charlier::read_RDS(filename)
+}
+
+#' Write quality_profile_pairs object
+#'
+#' @export
+#' @param x output from \code{\link{quality_profile_pairs}}
+#' @param filename the name of the file to write
+#' @return the input errors object
+write_QPP <- function(x, filename = "qpp.rds"){
+  charlier::write_RDS(x, filename)
+}
+
+#' Read quality_profile_pairs object
+#'
+#' @export
+#' @param filename the name of the file to read
+#' @return \code{\link{quality_profile_pairs}} listing
+read_QPP <- function(filename = "qpp.rds"){
+  charlier::read_RDS(filename)
+}
+
+
 
 #' Retrieve the PBS JIOBID if available
 #'

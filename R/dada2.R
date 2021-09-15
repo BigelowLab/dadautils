@@ -169,7 +169,7 @@ learn_errors <- function(filelist,
     )
 
   if (save_output){
-    saveRDS(errs, file = file.path(output_path, "learn_errors.rds"))
+    write_errors(errs, filename = file.path(output_path, "learn_errors"))
   }
 
   if (save_graphics){
