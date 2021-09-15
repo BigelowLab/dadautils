@@ -5,7 +5,12 @@
 #' @param output_path character, the output path
 #' @param compress logical, see \code{\link[dada2]{filterAndTrim}}
 #' @param multithread numeric, the number of cores to use. Defaults to \code{\link{count_cores}}
-#' @param truncLen character or numeric.  If character and "auto" then auto-compute trunLen, default "auto"
+#' @param truncLen character, numeric or data frame.  
+#' \describe{
+#' \item{"auto"}{if character and "auto" then autocompute truncLen per file pair (this is the default). In this case \code{\link[dada2]{filterAndTrim}} is called once per filepair.}  
+#' \item{numeric}{a 2 element foreward/reverse truncLen vector, see \code{\link[dada2]{filterAndTrim}}. In this case  \code{\link[dada2]{filterAndTrim}} is called just once.}
+#' \item{tibble or data frame}{a data frame or tibble with 'forward' and 'reverse' columns with truncLen values for each filepair. In this case \code{\link[dada2]{filterAndTrim}} is called once per filepair.}
+#' }
 #' @param cutoff_params list, in the event that trunLen is "auto" then pass these params to 
 #'    \code{\link{quality_profile_cutoff}}
 #' @param ... other arguments for \code{\link[dada2]{filterAndTrim}}
@@ -47,11 +52,27 @@ filter_and_trim <- function(filelist,
     rfilt <- if(!norev) charlier::add_extension(rfilt, ext = ".gz", no_dup = TRUE)
   }
 
+  # a lazybum way to make a print statement, other than dots all comes from enclosing environment
+  filter_and_trim_show <- function(truncLen = c(0,0), dots = list(...)){
+    cat("filterAndTrim:\n")
+    cat(sprintf("  first forward file: %s", basename(filelist$forward[1])), "\n")
+    if (norev){
+      cat("  reverse file: none\n")
+    } else {
+      cat(sprintf("  first reverse file: %s", basename(filelist$reverse[1])), "\n")
+    }
+    cat(sprintf("  compress: %s", compress), "\n")
+    cat(sprintf("  multithread: %s", multithread), "\n")
+    cat(sprintf("  truncLen: %s", paste(truncLen, collapse = " ")), "\n")
+    for (n in names(dots)){
+      cat(sprintf("  %s: %s", n, paste(dots[[n]], collapse = " ")), "\n")
+    }
+  } # filter_and_trim_show
   
   if (inherits(truncLen, 'character') && tolower(truncLen[1]) == "auto"){
     # if here, compute cutoffs 'truncLen' per file
     # apply filter and trim per file pair
-    
+    if (verbose) cat("filterAndTrim: autocomputing truncLen\n")
     cutoffs <- sapply(filelist,
       function(files){
         if (length(files) > 0){
@@ -73,22 +94,7 @@ filter_and_trim <- function(filelist,
             trunc_len <- c(cutoffs$forward$Cycle[i], cutoffs$reverse$Cycle[i])
           }
           
-          if (verbose){
-            cat("filterAndTrim:\n")
-            cat(sprintf("  forward file: %s", basename(filelist$forward[i])), "\n")
-            if (norev){
-              cat("  reverse file: none\n")
-            } else {
-              cat(sprintf("  reverse file: %s", basename(filelist$reverse[i])), "\n")
-            }
-            cat(sprintf("  compress: %s", compress), "\n")
-            cat(sprintf("  multithread: %s", multithread), "\n")
-            cat(sprintf("  truncLen: %s", paste(trunc_len, collapse = " ")), "\n")
-            dots <- list(...)
-            for (n in names(dots)){
-              cat(sprintf("  %s: %s", n, paste(dots[[n]], collapse = " ")), "\n")
-            }
-          }
+          if (verbose) filter_and_trim_show(truncLen = trunc_len)
           
           dada2::filterAndTrim(filelist$forward[i],
                                ffilt[i],
@@ -102,24 +108,40 @@ filter_and_trim <- function(filelist,
         }) %>%
         dplyr::bind_rows()
     
+  } else if(inherits(truncLen, "data.frame")){
+    if (verbose) cat("filterAndTrim: truncLen passed as a data frame\n")
+    truncLen <- truncLen %>% dplyr::as_tibble(truncLen)
+    if (!rlang::has_name(truncLen, "forward")) stop("truncLen should have a variable 'forward'")
+    if (norev && !rlang::has_name(truncLen, "reverse")) stop("truncLen should have a variable 'forward'")
+    if (nrow(truncLen) != length(filelist[[1]])) stop("truncLen must have a row for each input filepair")
+    
+      x <- lapply( seq_along(filelist[[1]]),
+        function(i){
+          
+          if (norev){
+            trunc_len <- truncLen$forward[i]
+          } else {
+            trunc_len <- c(truncLen$forward[i], truncLen$reverse[i])
+          }
+          
+          if (verbose) filter_and_trim_show(truncLen = trunc_len)
+          
+          dada2::filterAndTrim(filelist$forward[i],
+                               ffilt[i],
+                               rev = if (norev) { NULL } else {filelist$reverse[i]},
+                               filt.rev = rfilt[i],
+                               compress = compress,
+                               multithread = multithread,
+                               truncLen = trunc_len,
+                               ...) %>%
+              dplyr::as_tibble(rownames = "name")
+        }) %>%
+        dplyr::bind_rows()
+    
+    
   } else {
     
-    if (verbose){
-      cat("filterAndTrim:\n")
-      cat(sprintf("  first forward file: %s", basename(filelist$forward[1])), "\n")
-      if (norev){
-        cat("  reverse file: none\n")
-      } else {
-        cat(sprintf("  first reverse file: %s", basename(filelist$reverse[1])), "\n")
-      }
-      cat(sprintf("  compress: %s", compress), "\n")
-      cat(sprintf("  multithread: %s", multithread), "\n")
-      cat(sprintf("  truncLen: %s", paste(truncLen, collapse = " ")), "\n")
-      dots <- list(...)
-      for (n in names(dots)){
-        cat(sprintf("  %s: %s", n, paste(dots[[n]], collapse = " ")), "\n")
-      }
-    }
+   if (verbose) filter_and_trim_show()
     
     x <- dada2::filterAndTrim(filelist$forward,
                               ffilt,

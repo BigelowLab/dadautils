@@ -28,7 +28,12 @@ filter_and_trim(
 
 \item{multithread}{numeric, the number of cores to use. Defaults to \code{\link{count_cores}}}
 
-\item{truncLen}{character or numeric.  If character and "auto" then auto-compute trunLen, default "auto"}
+\item{truncLen}{character, numeric or data frame.
+\describe{
+\item{"auto"}{if character and "auto" then autocompute truncLen per file pair (this is the default). In this case \code{\link[dada2]{filterAndTrim}} is called once per filepair.}  
+\item{numeric}{a 2 element foreward/reverse truncLen vector, see \code{\link[dada2]{filterAndTrim}}. In this case  \code{\link[dada2]{filterAndTrim}} is called just once.}
+\item{tibble or data frame}{a data frame or tibble with 'forward' and 'reverse' columns with truncLen values for each filepair. In this case \code{\link[dada2]{filterAndTrim}} is called once per filepair.}
+}}
 
 \item{cutoff_params}{list, in the event that trunLen is "auto" then pass these params to 
 \code{\link{quality_profile_cutoff}}}
