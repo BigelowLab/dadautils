@@ -72,6 +72,8 @@ assign_taxonomy <- function(seqs,
     ok <- verify_taxalevels(taxLevels, refFasta)
     
     x <- dada2::assignTaxonomy(seqs, refFasta, taxLevels = taxLevels, ...)  
+    cat("\n") # because assign taxonomy is verbose without adding a new line
+    
     if (populate_truncated){
       if (length(x) == 2 && "tax" %in% names(x)){
         x <- x$tax

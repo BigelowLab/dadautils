@@ -4,7 +4,7 @@
 \alias{merge_pairs}
 \title{Merge pairs ala dada2::mergePairs}
 \usage{
-merge_pairs(filelist, dada_r, save_output = TRUE, ...)
+merge_pairs(filelist, dada_r, save_output = FALSE, ...)
 }
 \arguments{
 \item{filelist}{list of forward and reverse fastq files}

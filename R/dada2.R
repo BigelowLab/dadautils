@@ -250,7 +250,7 @@ run_dada <- function(filelist, errs,
 #' @param ... arguments for \code{\link[dada2]{mergePairs}}
 #' @return as returned by \code{\link[dada2]{mergePairs}}
 merge_pairs <- function(filelist, dada_r,
-  save_output = TRUE,
+  save_output = FALSE,
   ...){
   ff <- lapply(filelist, dada2::derepFastq)
   x <- dada2::mergePairs(
@@ -261,7 +261,7 @@ merge_pairs <- function(filelist, dada_r,
     ...)
     if (save_output){
       output_path <- dirname(filelist$forward[1])
-      saveRDS(x, file = file.path(output_path, "mergers.rds"))
+      write_mergers(x, filename = file.path(output_path, "mergers"))
     }
   x
 }

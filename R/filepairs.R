@@ -134,15 +134,17 @@ read_fastq_paired <- function(filelist = example_filepairs()){
 #' @export
 #' @param filelist a paired list forward/reverse filenames (one or both may be empty)
 #' @param nreads numeric, see \code{\link[Rsubread]{qualityScores}}
+#' @param cleanup logical, if TRUE tidy up the detritus left be Rsubread
 #' @return a paired list of quality score matrices or NULL if that component of inputs is empty
-paired_quality_scores <- function(filelist = example_filepairs(), nreads = -1) {
+paired_quality_scores <- function(filelist = example_filepairs(), nreads = -1,
+  cleanup = TRUE) {
   
   rr <- sapply(filelist,
     function(files, nreads = -1){
       if (length(files) > 0){
         r <- parallel::mclapply(files, 
           function(file, nreads = -1) {
-            Rsubread::qualityScores(file, nreads = nreads)
+            x <- Rsubread::qualityScores(file, nreads = nreads)
           }, nreads = nreads) %>%
           stats::setNames(basename(files))
       } else {
@@ -150,6 +152,8 @@ paired_quality_scores <- function(filelist = example_filepairs(), nreads = -1) {
       }
       r
     }, nreads = nreads, simplify = FALSE)
+    
+    if (cleanup) ok <- purge_files()
   rr
 }
 
