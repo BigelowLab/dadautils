@@ -17,9 +17,11 @@ run_cutadapt <- function(
   
   FWD.RC <- dada2::rc(CFG$primer$FWD)
   REV.RC <- dada2::rc(CFG$primer$REV)
-  R1.flags <- paste("-g", CFG$primer$FWD, "-a", REV.RC)
-  R2.flags <- paste("-G", CFG$primer$REV, "-A", FWD.RC)
-
+#  R1.flags <- paste("-g", CFG$primer$FWD, "-a", REV.RC)
+#  R2.flags <- paste("-G", CFG$primer$REV, "-A", FWD.RC)
+  R1.flags <- paste("-a"," ^", CFG$primer$FWD, "...", REV.RC, sep="")
+  R2.flags <- paste("-A", " ^", CFG$primer$REV, "...", FWD.RC, sep="")
+  
   if (is.numeric(CFG$multithread) && (CFG$multithread > 1)) {
     CFG$cutadapt$more_args <- paste0(CFG$cutadapt$more_args, " --cores=",CFG$multithread )
   }
@@ -36,7 +38,7 @@ run_cutadapt <- function(
         args = c(
           R1.flags, 
           R2.flags, 
-          CFG$more_args, 
+          CFG$cutadapt$more_args, 
            "-o", cut_files$forward[i], 
            "-p", cut_files$reverse[i],
            filt_files$forward[i], 
