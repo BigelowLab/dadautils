@@ -80,12 +80,12 @@ reads_overlap <- function(f = 250, r = 189, a = 400){f - (a-r)}
 #'  }
 quality_profile_cutoff <- function(x = quality_profile_data(),
   method = "ruler",
-  params = list(score = 30, model = "Mean ~ poly(Cycle, 2)", quantile_min = 0.99),
+  params = list(score = 30, model = "Mean ~ poly(Cycle, 2)", quantile_min = 0.9),
   form = c("full", "reduced")[2]){
   
     if (FALSE){
       method = "ruler"
-      params = list(score = 30, model = "Mean ~ poly(Cycle, 2)", quantile_min = 0.99)
+      params = list(score = 30, model = "Mean ~ poly(Cycle, 2)", quantile_min = 0.9)
       form = c("full", "reduced")[2]
     }
   
