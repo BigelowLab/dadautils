@@ -15,36 +15,56 @@ run_cutadapt <- function(
   save_output = TRUE,
   save_graphics = FALSE){
   
-  FWD.RC <- dada2::rc(CFG$primer$FWD)
-  REV.RC <- dada2::rc(CFG$primer$REV)
-#  R1.flags <- paste("-g", CFG$primer$FWD, "-a", REV.RC)
-#  R2.flags <- paste("-G", CFG$primer$REV, "-A", FWD.RC)
-  R1.flags <- paste("-a"," ^", CFG$primer$FWD, "...", REV.RC, sep="")
-  R2.flags <- paste("-A", " ^", CFG$primer$REV, "...", FWD.RC, sep="")
   
   if (is.numeric(CFG$multithread) && (CFG$multithread > 1)) {
     CFG$cutadapt$more_args <- paste0(CFG$cutadapt$more_args, " --cores=",CFG$multithread )
   }
-
   
-  OK <- sapply(seq_along(cut_files$forward),
-    function(i){
-      if (save_output){
-        ofile <- paste0(charlier::strip_extension(cut_files$forward[i]), ".cutadapt_output.txt")
-      } else {
-        ofile <- ""
-      }
-      system2(CFG$cutadapt$app, 
-        args = c(
-          R1.flags, 
-          R2.flags, 
-          CFG$cutadapt$more_args, 
-           "-o", cut_files$forward[i], 
-           "-p", cut_files$reverse[i],
-           filt_files$forward[i], 
-           filt_files$reverse[i]),
-         stdout = ofile)
-    })
+  # here we split - either the user provided PRIMER info in the config (in which case we build the -a and -A args, OR the user drops these in favor of manually providing the these are part of CFG$more_args)
+  if (is.null(CFG$primer) || charlier::is.nullna(CFG$primer$FWD) || charlier::is.nullna(CFG$primer$REV)){
+    # then just use more_args
+    OK <- sapply(seq_along(cut_files$forward),
+      function(i){
+        if (save_output){
+          ofile <- paste0(charlier::strip_extension(cut_files$forward[i]), ".cutadapt_output.txt")
+        } else {
+          ofile <- ""
+        }
+        system2(CFG$cutadapt$app, 
+          args = c(
+            CFG$cutadapt$more_args, 
+             "-o", cut_files$forward[i], 
+             "-p", cut_files$reverse[i],
+             filt_files$forward[i], 
+             filt_files$reverse[i]),
+           stdout = ofile)
+      })
+  } else {
+    # here we build from CFG$primer
+    FWD.RC <- dada2::rc(CFG$primer$FWD)
+    REV.RC <- dada2::rc(CFG$primer$REV)
+    R1.flags <- paste("-a"," ^", CFG$primer$FWD, "...", REV.RC, sep="")
+    R2.flags <- paste("-A", " ^", CFG$primer$REV, "...", FWD.RC, sep="")
+    OK <- sapply(seq_along(cut_files$forward),
+      function(i){
+        if (save_output){
+          ofile <- paste0(charlier::strip_extension(cut_files$forward[i]), ".cutadapt_output.txt")
+        } else {
+          ofile <- ""
+        }
+        system2(CFG$cutadapt$app, 
+          args = c(
+            R1.flags, 
+            R2.flags, 
+            CFG$cutadapt$more_args, 
+             "-o", cut_files$forward[i], 
+             "-p", cut_files$reverse[i],
+             filt_files$forward[i], 
+             filt_files$reverse[i]),
+           stdout = ofile)
+      })
+  }
+    
   if (all(OK == 0) & save_graphics){
     ix <- seq_len(max(length(cut_files$forward), 2))
     ofile <- paste0(strip_extension(cut_files$forward[1]), ".cutadapt_quality.pdf")
