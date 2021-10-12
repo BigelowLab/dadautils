@@ -7,7 +7,7 @@
 quality_profile_cutoff(
   x = quality_profile_data(),
   method = "ruler",
-  params = list(score = 30, model = "Mean ~ poly(Cycle, 2)", quantile_min = 0.99),
+  params = list(score = 30, model = "Mean ~ poly(Cycle, 2)", quantile_min = 0.9),
   form = c("full", "reduced")[2]
 )
 }

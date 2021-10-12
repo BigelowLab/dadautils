@@ -615,10 +615,10 @@ quality_profile_pairs <- function(
 
     #xx <- lapply(filelist, quality_profile, n = n, aggregate = aggregate, ...)
     xx <- lapply(filelist,
-      function(filenames, n = n, aggregate = aggregate ){
+      function(filenames, n = n, aggregate = aggregate, ... ){
           x <- quality_profile_data(filenames, n = n, aggregate = aggregate ) %>%
-          quality_profile_cutoff()
-        }, n = n, aggregate = aggregate)
+          quality_profile_cutoff(...)
+        }, n = n, aggregate = aggregate, ...)
     xx$pairs_plot <- quality_profile_pairs_drawing(xx)
     
     
