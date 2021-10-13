@@ -44,7 +44,8 @@ deinterleave_filepairs <- function(x, elements = c("forward", "reverse")){
 #' @param require_reverse logical, if TRUE then insist that reverse files must be present (ala Illumina).
 #'   If FALSE (the default) then allow reverse files to be absent (ala PacBio)
 #' @return the input list
-verify_filepairs <- function(x, elements = c("forward", "reverse"),
+verify_filepairs <- function(x, 
+  elements = c("forward", "reverse"),
   require_reverse = FALSE){
 
   if (!all((elements %in% names(x)))) stop("input is missing one or more required elements")
@@ -67,8 +68,11 @@ verify_filepairs <- function(x, elements = c("forward", "reverse"),
 #'
 #' @export
 #' @param path character, the input path
-#' @param pattern_forward file pattern, the default is to match either "_R1_001.fastq" or "_R1_001.fastq.gz"
-#' @param pattern_reverse file pattern, the default is to match either "_R2_001.fastq" or "_R2_001.fastq.gz"
+#' @param pattern_forward file pattern, the default is to match "^.*R1_001"
+#' @param pattern_reverse file pattern, the default is to match either "^.*R2_001"
+#' @param patterns_exclude one or more file patterns to exclude, default is "^.*\\.cutadapt_output\\.txt$"
+#'        Unlike \code{pattern_forward} and \code{pattern_reverse} this can have multiple elements.  Set to 
+#'        NULL of NA to skip.
 #' @param glob logical, if \code{TRUE} the input patterns are considered file globs like "*_R1_001.fastq"
 #'        and will be converted to regex patterns using \code{\link[utils]{glob2rx}}.
 #'        If glob is \code{FALSE} then the the patterns are passed to \code{\link[base]{list.files}}
@@ -79,6 +83,7 @@ verify_filepairs <- function(x, elements = c("forward", "reverse"),
 list_filepairs <- function(path,
                        pattern_forward = "^.*R1_001",
                        pattern_reverse = "^.*R2_001",
+                       patterns_exclude = "^.*\\.cutadapt_output\\.txt$",
                        glob = FALSE,
                        verify = TRUE,
                        ...){
@@ -92,6 +97,15 @@ list_filepairs <- function(path,
     forward = sort(list.files(path, pattern = pattern_forward, full.names = TRUE, ...)),
     reverse = sort(list.files(path, pattern = pattern_reverse, full.names = TRUE, ...)) 
   )
+  
+  if (!charlier::is.nullna(patterns_exclude[1])){
+    if (glob) patterns_exclude = utils::glob2rx(patterns_exclude)
+    x <- sapply(x,
+      function(x){
+        ix <- charlier::mgrepl(patterns_exclude, x, fixed = glob)
+        x[!ix]
+      }, simplify = FALSE)
+  }
   
 
   if (verify) x <- verify_filepairs(x)
