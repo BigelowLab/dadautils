@@ -23,6 +23,10 @@ verify_filepairs(
 
 \item{require_reverse}{logical, if TRUE then insist that reverse files must be present (ala Illumina).
 If FALSE (the default) then allow reverse files to be absent (ala PacBio)}
+
+\item{min_size}{numeric, files with fewer bytes than this number are considered empty.  This is added to 
+detect output files that are written but have no content (well, have no meaningful content).
+Set to \code{NA} or \code{NULL} to skip this assessment, set to \code{1} to test for at least one byte.}
 }
 \value{
 the input list

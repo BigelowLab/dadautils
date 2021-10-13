@@ -43,10 +43,14 @@ deinterleave_filepairs <- function(x, elements = c("forward", "reverse")){
 #' @param elements character, the names of the file pair elements to test
 #' @param require_reverse logical, if TRUE then insist that reverse files must be present (ala Illumina).
 #'   If FALSE (the default) then allow reverse files to be absent (ala PacBio)
+#' @param min_size numeric, files with fewer bytes than this number are considered empty.  This is added to 
+#'   detect output files that are written but have no content (well, have no meaningful content).
+#'   Set to \code{NA} or \code{NULL} to skip this assessment, set to \code{1} to test for at least one byte.
 #' @return the input list
 verify_filepairs <- function(x, 
   elements = c("forward", "reverse"),
-  require_reverse = FALSE){
+  require_reverse = FALSE,
+  min_size = NA){
 
   if (!all((elements %in% names(x)))) stop("input is missing one or more required elements")
 
@@ -58,6 +62,14 @@ verify_filepairs <- function(x,
     if (!all(ll %in% ll[1])) stop("elements of input must be the same length")
   }
   
+  if (!charlier::is.nullna(min_size[1])){
+    ok <- lapply(x, 
+      function(x){
+        fi <- file.info(x, extra_cols = FALSE)
+        if (any(fi$isdir)) stop("one or more elements is a directory - all elements should be files")
+        if (any(fi$size < min_size[1])) stop("one or more elements is smaller than min_size:", min_size[1])
+      })
+  }
   x
 }
 

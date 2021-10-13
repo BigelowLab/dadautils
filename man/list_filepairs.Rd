@@ -8,6 +8,7 @@ list_filepairs(
   path,
   pattern_forward = "^.*R1_001",
   pattern_reverse = "^.*R2_001",
+  patterns_exclude = "^.*\\\\.cutadapt_output\\\\.txt$",
   glob = FALSE,
   verify = TRUE,
   ...
@@ -16,9 +17,13 @@ list_filepairs(
 \arguments{
 \item{path}{character, the input path}
 
-\item{pattern_forward}{file pattern, the default is to match either "_R1_001.fastq" or "_R1_001.fastq.gz"}
+\item{pattern_forward}{file pattern, the default is to match "^.*R1_001"}
 
-\item{pattern_reverse}{file pattern, the default is to match either "_R2_001.fastq" or "_R2_001.fastq.gz"}
+\item{pattern_reverse}{file pattern, the default is to match either "^.*R2_001"}
+
+\item{patterns_exclude}{one or more file patterns to exclude, default is "^.*\\.cutadapt_output\\.txt$"
+Unlike \code{pattern_forward} and \code{pattern_reverse} this can have multiple elements.  Set to 
+NULL of NA to skip.}
 
 \item{glob}{logical, if \code{TRUE} the input patterns are considered file globs like "*_R1_001.fastq"
 and will be converted to regex patterns using \code{\link[utils]{glob2rx}}.
