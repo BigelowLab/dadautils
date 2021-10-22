@@ -41,16 +41,17 @@ deinterleave_filepairs <- function(x, elements = c("forward", "reverse")){
 #' @export
 #' @param x a list with file pairings as character vectors
 #' @param elements character, the names of the file pair elements to test
+#' @param min_size numeric or NA, the mininum size of a file required
 #' @param require_reverse logical, if TRUE then insist that reverse files must be present (ala Illumina).
 #'   If FALSE (the default) then allow reverse files to be absent (ala PacBio)
 #' @param min_size numeric, files with fewer bytes than this number are considered empty.  This is added to 
 #'   detect output files that are written but have no content (well, have no meaningful content).
 #'   Set to \code{NA} or \code{NULL} to skip this assessment, set to \code{1} to test for at least one byte.
-#' @return the input list
+#' @return the input list with possibly all elements remove if all files fail the \code{min_size} test
 verify_filepairs <- function(x, 
   elements = c("forward", "reverse"),
-  require_reverse = FALSE,
-  min_size = NA){
+  min_size = c(NA, 100)[1],
+  require_reverse = FALSE){
 
   if (!all((elements %in% names(x)))) stop("input is missing one or more required elements")
 
@@ -62,16 +63,61 @@ verify_filepairs <- function(x,
     if (!all(ll %in% ll[1])) stop("elements of input must be the same length")
   }
   
+  # test each file pair against min_size
+  # for any pair with at least one is small, drop it
+  # and provide warning
   if (!charlier::is.nullna(min_size[1])){
-    ok <- lapply(x, 
-      function(x){
-        fi <- file.info(x, extra_cols = FALSE)
-        if (any(fi$isdir)) stop("one or more elements is a directory - all elements should be files")
-        if (any(fi$size < min_size[1])) stop("one or more elements is smaller than min_size:", min_size[1])
-      })
+    
+    y <- size_filepairs(x, min_size = min_size[1], verify = FALSE)
+    small_ix <- is.na(y$size_pass) | !y$size_pass
+    if (all(small_ix)){
+      warning("All files are smaller than min_size: ", min_size[1])
+      # empty the list
+      x <- sapply(x, function(x) {x <- character(0); x}, simplify = FALSE)
+    } else if (any(small_ix)){
+      x <- y %>% 
+        dplyr::filter(!small_ix) %>%
+        dplyr::select(dplyr::all_of(elements)) %>%
+        as.list()
+      y <- y %>% 
+        dplyr::filter(small_ix) %>%
+        `[[`(1)
+      msg <- sprintf("%i small filepairs encountered, dropping: %s", length(y), paste(basename(y), collapse = ", "))
+      warning(msg)
+    }
   }
   x
 }
+
+#' Compute and test the size of filepairs
+#' 
+#' @export
+#' @param x named list of filepairs, typically 'forward' and 'reverse'
+#' @param min_size numeric or NA, the mininum size of a file required
+#' @param verify logical, if TRUE pass the input to \code{verify_filepairs}
+#' @param ... other arguments passed to \code{verify_filepairs} except \code{min_size}
+#' @return tibble of 
+#' \itemize{
+#'   \item forward, charcater vector of foreward filenames
+#'   \item reverse, charcater vector of reverse filenames
+#'   \item forward_size, numeric file sizes in bytes
+#'   \item reverse_size, numeric file sizes in bytes
+#'   \item size_pass logical, TRUE/FALSE if the size passes and NA when min_size is NA
+#' }
+size_filepairs <- function(x, min_size = NA, verify = FALSE, ...){
+  # TODO make this work for PACBIO
+  if (verify) x <- verify_filepairs(x) 
+  nm <- names(x)
+  sz <- sapply(x, function(x) file.info(x)$size, simplify = FALSE)
+  nmsz <- paste0(nm, "_size")
+  size_pass <- sz[[1]] > min_size[1] | sz[[2]] > min_size[1]
+  dplyr::as_tibble(x) %>%
+    dplyr::mutate(
+      !!nmsz[1] := sz[[1]],
+      !!nmsz[2] := sz[[2]],
+      size_pass = size_pass)
+}
+
 
 #' List files and separate into forward and reverse file lists based upon filenaming patterns.
 #'

@@ -29,7 +29,7 @@ detect output files that are written but have no content (well, have no meaningf
 Set to \code{NA} or \code{NULL} to skip this assessment, set to \code{1} to test for at least one byte.}
 }
 \value{
-the input list
+the input list with possibly all elements remove if all files fail the \code{min_size} test
 
 the input list
 }

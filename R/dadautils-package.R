@@ -5,7 +5,7 @@
 #' @seealso \href{https://github.com/BigelowLab/charlier}{charlier} companion package
 #' @name dadautils-package
 #' @aliases dadautils
-#' @importFrom rlang .data
+#' @importFrom rlang .data !! :=
 #' @importFrom dplyr %>%
 #' @importFrom grDevices dev.off pdf
 #' @importFrom utils installed.packages write.csv
