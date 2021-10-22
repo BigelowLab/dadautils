@@ -141,7 +141,7 @@ filter_and_trim <- function(filelist,
     
   } else {
     
-   if (verbose) filter_and_trim_show()
+   if (verbose) filter_and_trim_show(truncLen = truncLen)
     
     x <- dada2::filterAndTrim(filelist$forward,
                               ffilt,
