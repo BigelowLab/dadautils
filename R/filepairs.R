@@ -1,58 +1,16 @@
-#' Given a filepair list, make a vector of alternating filenames
-#'
-#' @export
-#' @param x a filepairs list (two element list for forard and reverse filenames)
-#' @return a vector of interleaved filenames
-interleave_filepairs <- function(x){
-  nf <- length(x[[1]])
-  nr <- length(x[[2]])
-  if (nf != nr) stop("input must two element listing of files of equal length")
-  n <- nf + nr
-  fi <- seq(from = 1, to = n, by = 2)
-  ri <- seq(from = 2, to = n, by = 2)
-  r <- rep("", n)
-  r[fi] <- x[[1]]
-  r[ri] <- x[[2]]
-  r
-}
-
-#' Given a even numbered vector of filenames, deinterleaf into a filepairs list
-#'
-#' @export
-#' @param x a vector of items
-#' @param elements character,the names of the elements
-#' @return return a filepairs list
-deinterleave_filepairs <- function(x, elements = c("forward", "reverse")){
-  n <- length(x)
-  if (as.logical(n %% 2)) stop("input must have even number of elements")
-  fi <- seq(from = 1, to = n, by = 2)
-  ri <- seq(from = 2, to = n, by = 2)
-  list(x[fi], x[ri]) %>%
-    stats::setNames(elements)
-}
-
-
-
 #' Verify that a list of file pairs is suitable for processing.
-#'
-#' This will throw an error if there is a mismatch between the number of
-#' elements in the list elements. Otherwise it simply passes the data through.
 #'
 #' @export
 #' @param x a list with file pairings as character vectors
+#' @param min_size numeric, files with fewer bytes than this number are considered empty. Set to NA or NULL to ignore file size.
 #' @param elements character, the names of the file pair elements to test
-#' @param min_size numeric or NA, the mininum size of a file required
-#' @param require_reverse logical, if TRUE then insist that reverse files must be present (ala Illumina).
-#'   If FALSE (the default) then allow reverse files to be absent (ala PacBio)
-#' @param min_size numeric, files with fewer bytes than this number are considered empty.  This is added to 
-#'   detect output files that are written but have no content (well, have no meaningful content).
-#'   Set to \code{NA} or \code{NULL} to skip this assessment, set to \code{1} to test for at least one byte.
-#' @return the input list with possibly all elements remove if all files fail the \code{min_size} test
+#' @param require_reverse logical, if TRUE then insist that reverse files must be present (ala Illumina). If FALSE (the default) then allow reverse files to be absent (ala PacBio)
+#' @return the input list with possibly all elements removed if all files fail the size test
 verify_filepairs <- function(x, 
-  elements = c("forward", "reverse"),
-  min_size = c(NA, 100)[1],
+  min_size = NULL, 
+  elements = c("forward", "reverse"), 
   require_reverse = FALSE){
-
+  
   if (!all((elements %in% names(x)))) stop("input is missing one or more required elements")
 
   ll <- lengths(x)
@@ -88,6 +46,44 @@ verify_filepairs <- function(x,
   }
   x
 }
+
+
+#' Given a filepair list, make a vector of alternating filenames
+#'
+#' @export
+#' @param x a filepairs list (two element list for forard and reverse filenames)
+#' @return a vector of interleaved filenames
+interleave_filepairs <- function(x){
+  nf <- length(x[[1]])
+  nr <- length(x[[2]])
+  if (nf != nr) stop("input must two element listing of files of equal length")
+  n <- nf + nr
+  fi <- seq(from = 1, to = n, by = 2)
+  ri <- seq(from = 2, to = n, by = 2)
+  r <- rep("", n)
+  r[fi] <- x[[1]]
+  r[ri] <- x[[2]]
+  r
+}
+
+#' Given a even numbered vector of filenames, deinterleaf into a filepairs list
+#'
+#' @export
+#' @param x a vector of items
+#' @param elements character,the names of the elements
+#' @return return a filepairs list
+deinterleave_filepairs <- function(x, elements = c("forward", "reverse")){
+  n <- length(x)
+  if (as.logical(n %% 2)) stop("input must have even number of elements")
+  fi <- seq(from = 1, to = n, by = 2)
+  ri <- seq(from = 2, to = n, by = 2)
+  list(x[fi], x[ri]) %>%
+    stats::setNames(elements)
+}
+
+
+
+
 
 #' Compute and test the size of filepairs
 #' 

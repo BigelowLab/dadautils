@@ -201,34 +201,6 @@ add_extension <- function(
 }
 
 
-#' Verify that a list of file pairs is suitable for processing.
-#'
-#' This will throw an error if there is a mismatch between the number of
-#' elements in the list elements. Otherwise it simply passes the data through.
-#'
-#' @export
-#' @param x a list with file pairings as character vectors
-#' @param elements character, the names of the file pair elements to test
-#' @param require_reverse logical, if TRUE then insist that reverse files must be present (ala Illumina).
-#'   If FALSE (the default) then allow reverse files to be absent (ala PacBio)
-#' @return the input list
-verify_filepairs <- function(x, elements = c("forward", "reverse"),
-  require_reverse = FALSE){
-
-  if (!all((elements %in% names(x)))) stop("input is missing one or more required elements")
-
-  ll <- lengths(x)
-
-  if (length(ll[2]) == 0){
-    if (require_reverse) stop("reverse elements are required")
-  } else {
-    if (!all(ll %in% ll[1])) stop("elements of input must be the same length")
-  }
-  
-  x
-}
-
-
 #' List fastq files and separate into forward and reverse reads
 #'
 #' @export
