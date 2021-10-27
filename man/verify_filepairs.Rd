@@ -8,7 +8,8 @@ verify_filepairs(
   x,
   min_size = NULL,
   elements = c("forward", "reverse"),
-  require_reverse = FALSE
+  require_reverse = FALSE,
+  action = c("stop", "warn")[2]
 )
 }
 \arguments{
@@ -19,6 +20,9 @@ verify_filepairs(
 \item{elements}{character, the names of the file pair elements to test}
 
 \item{require_reverse}{logical, if TRUE then insist that reverse files must be present (ala Illumina). If FALSE (the default) then allow reverse files to be absent (ala PacBio)}
+
+\item{action}{character, either stop or warn upon discovery of mismatched files or all file sizes
+fall below the minimum size (if tested)}
 }
 \value{
 the input list with possibly all elements removed if all files fail the size test

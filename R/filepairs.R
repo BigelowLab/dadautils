@@ -1,3 +1,14 @@
+#' Count the length of filepairs
+#'
+#' @export
+#' @param x a list with file pairings as character vectors
+#' @return named numeric vector with counts for each element
+count_filepairs <- function(x){
+  lengths(x)
+}
+
+
+
 #' Verify that a list of file pairs is suitable for processing.
 #'
 #' @export
@@ -5,20 +16,30 @@
 #' @param min_size numeric, files with fewer bytes than this number are considered empty. Set to NA or NULL to ignore file size.
 #' @param elements character, the names of the file pair elements to test
 #' @param require_reverse logical, if TRUE then insist that reverse files must be present (ala Illumina). If FALSE (the default) then allow reverse files to be absent (ala PacBio)
+#' @param action character, either stop or warn upon discovery of mismatched files or all file sizes
+#'   fall below the minimum size (if tested) 
 #' @return the input list with possibly all elements removed if all files fail the size test
 verify_filepairs <- function(x, 
   min_size = NULL, 
   elements = c("forward", "reverse"), 
-  require_reverse = FALSE){
+  require_reverse = FALSE,
+  action = c("stop", "warn")[2]){
+  
+    # a silly convenience function
+  stop_or_warn <- function(action, ...){
+    switch(tolower(action[1]),
+      'stop' = stop(...),
+      warning(...))
+  }
   
   if (!all((elements %in% names(x)))) stop("input is missing one or more required elements")
 
   ll <- lengths(x)
 
   if (length(ll[2]) == 0){
-    if (require_reverse) stop("reverse elements are required")
+    if (require_reverse) stop_or_warn("stop", "reverse elements are required")
   } else {
-    if (!all(ll %in% ll[1])) stop("elements of input must be the same length")
+    if (!all(ll %in% ll[1])) stop_or_warn("stop","elements of input must be the same length")
   }
   
   # test each file pair against min_size
@@ -29,7 +50,7 @@ verify_filepairs <- function(x,
     y <- size_filepairs(x, min_size = min_size[1], verify = FALSE)
     small_ix <- is.na(y$size_pass) | !y$size_pass
     if (all(small_ix)){
-      warning("All files are smaller than min_size: ", min_size[1])
+      stop_or_warn(action, "All files are smaller than min_size: ", min_size[1])
       # empty the list
       x <- sapply(x, function(x) {x <- character(0); x}, simplify = FALSE)
     } else if (any(small_ix)){
@@ -40,8 +61,9 @@ verify_filepairs <- function(x,
       y <- y %>% 
         dplyr::filter(small_ix) %>%
         `[[`(1)
-      msg <- sprintf("%i small filepairs encountered, dropping: %s", length(y), paste(basename(y), collapse = ", "))
-      warning(msg)
+      msg <- sprintf("%i small filepairs encountered, dropping: %s", 
+                     length(y), paste(basename(y), collapse = ", "))
+      stop_or_warn("warn", msg)
     }
   }
   x
