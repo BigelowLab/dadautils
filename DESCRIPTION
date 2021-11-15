@@ -9,25 +9,26 @@ License: MIT + file LICENSE
 URL: https://github.com/BigelowLab/dadautils
 Encoding: UTF-8
 Depends:
-    R (>= 4.0)
+  R (>= 4.0)
 Imports:
   parallel,
   utils,
   stats,
   grDevices,
-	rlang,
+  rlang,
   dplyr,
   tidyselect,
   stringr,
-	readr,
-	yaml,
-	dada2,
-	phyloseq,
-	Biostrings,
-	ShortRead,
+  readr,
+  yaml,
+  dada2,
+  phyloseq,
+  Biostrings,
+  ShortRead,
   Rsubread,
-	IRanges,
-	patchwork,
-	ggplot2,
-  charlier
+  IRanges,
+  patchwork,
+  ggplot2,
+  charlier,
+  auntie
 RoxygenNote: 7.1.2

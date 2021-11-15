@@ -15,6 +15,7 @@ run_cutadapt <- function(
   save_output = TRUE,
   save_graphics = FALSE){
   
+  norev <- charlier::is.nullna(filt_files[['reverse']]) || length(filt_files$reverse) == 0
   
   if (is.numeric(CFG$multithread) && (CFG$multithread > 1)) {
     CFG$cutadapt$more_args <- paste0(CFG$cutadapt$more_args, " --cores=",CFG$multithread )
@@ -30,14 +31,23 @@ run_cutadapt <- function(
         } else {
           ofile <- ""
         }
-        system2(CFG$cutadapt$app, 
-          args = c(
-            CFG$cutadapt$more_args, 
-             "-o", cut_files$forward[i], 
-             "-p", cut_files$reverse[i],
-             filt_files$forward[i], 
-             filt_files$reverse[i]),
-           stdout = ofile)
+        if (norev){
+          system2(CFG$cutadapt$app, 
+            args = c(
+              CFG$cutadapt$more_args, 
+               "-o", cut_files$forward[i], 
+               filt_files$forward[i]),
+             stdout = ofile)
+        } else {
+          system2(CFG$cutadapt$app, 
+            args = c(
+              CFG$cutadapt$more_args, 
+               "-o", cut_files$forward[i], 
+               "-p", cut_files$reverse[i],
+               filt_files$forward[i], 
+               filt_files$reverse[i]),
+             stdout = ofile)          
+        }
       })
   } else {
     # here we build from CFG$primer
@@ -52,16 +62,27 @@ run_cutadapt <- function(
         } else {
           ofile <- ""
         }
-        system2(CFG$cutadapt$app, 
-          args = c(
-            R1.flags, 
-            R2.flags, 
-            CFG$cutadapt$more_args, 
-             "-o", cut_files$forward[i], 
-             "-p", cut_files$reverse[i],
-             filt_files$forward[i], 
-             filt_files$reverse[i]),
-           stdout = ofile)
+        if (norev){
+          system2(CFG$cutadapt$app, 
+            args = c(
+              R1.flags, 
+              R2.flags, 
+              CFG$cutadapt$more_args, 
+               "-o", cut_files$forward[i], 
+               filt_files$forward[i]),
+             stdout = ofile)
+        } else {
+          system2(CFG$cutadapt$app, 
+            args = c(
+              R1.flags, 
+              R2.flags, 
+              CFG$cutadapt$more_args, 
+               "-o", cut_files$forward[i], 
+               "-p", cut_files$reverse[i],
+               filt_files$forward[i], 
+               filt_files$reverse[i]),
+             stdout = ofile)
+        }
       })
   }
     
@@ -69,7 +90,11 @@ run_cutadapt <- function(
     ix <- seq_len(max(length(cut_files$forward), 2))
     ofile <- paste0(strip_extension(cut_files$forward[1]), ".cutadapt_quality.pdf")
     grDevices::pdf(ofile)
-    try(dada2::plotQualityProfile(cut_files$forward[ix]) +  dada2::plotQualityProfile(cut_files$reverse[ix]))
+    if (norev){
+      try(dada2::plotQualityProfile(cut_files$forward[ix]))
+    } else {
+      try(dada2::plotQualityProfile(cut_files$forward[ix]) +  dada2::plotQualityProfile(cut_files$reverse[ix]))
+    }
     grDevices::dev.off()
   }
   OK

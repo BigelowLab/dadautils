@@ -35,7 +35,8 @@ Provides utility functions for working with [dada2](https://benjjneb.github.io/d
 + [ggplot2](https://CRAN.R-project.org/package=ggplot2)
 
  + [charlier](https://github.com/BigelowLab/charlier)
-	
+
+ + [auntie](https://github.com/BigelowLab/auntie)
 
 ### Note
 
@@ -122,21 +123,8 @@ edna_path("foo", "bar.csv", root = "/home/btupper")
 
 #### File pair listings
 
-Input files are often in pairs (forward and reverse) that are distinguished by naming pattern. This function will list those found in a directory and return a two element list.  These are very convenient and the list is used as a standard input to `dadautils` wrapper functions where appropriate. Some datasets do not have paired files (PacBio for instance), in this case we proceed with a filepair listing approach where one of the filepair elements is empty.
+Input files are often in pairs (forward and reverse) that are distinguished by naming pattern.  See the [auntie](https://github.com/BigelowLab/auntie) for filepair utilities. 
 
-```
-fq_files <- list_filepairs("/home/btupper/edna/data/examples/ben_demo_raw/filtN",
-  pattern_forward = "*_R1_001.fastq",
-  pattern_reverse = "*_R2_001.fastq") 
-str(fq_files)
-# List of 2
-#  $ forward: chr [1:2] 
-#     "/home/btupper/edna/data/examples/ben_demo_raw/filtN/BR2_2016_S216_L001_R1_001.fastq"
-#     "/home/btupper/edna/data/examples/ben_demo_raw/filtN/BR3_2016_S228_L001_R1_001.fastq"
-#  $ reverse: chr [1:2] 
-#     "/home/btupper/edna/data/examples/ben_demo_raw/filtN/BR2_2016_S216_L001_R2_001.fastq" 
-#     "/home/btupper/edna/data/examples/ben_demo_raw/filtN/BR3_2016_S228_L001_R2_001.fastq"
-```
 
 ### Wrapper functions
 
