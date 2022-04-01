@@ -10,7 +10,7 @@ interleave_filepairs(x)
 \item{x}{a filepairs list (two element list for forard and reverse filenames)}
 }
 \value{
-a vector of interleaved filenames
+see \code{\link[auntie]{interleave_filepairs}}
 }
 \description{
 Given a filepair list, make a vector of alternating filenames

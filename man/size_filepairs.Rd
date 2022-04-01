@@ -4,26 +4,15 @@
 \alias{size_filepairs}
 \title{Compute and test the size of filepairs}
 \usage{
-size_filepairs(x, min_size = NA, verify = FALSE, ...)
+size_filepairs(x, ...)
 }
 \arguments{
 \item{x}{named list of filepairs, typically 'forward' and 'reverse'}
 
-\item{min_size}{numeric or NA, the mininum size of a file required}
-
-\item{verify}{logical, if TRUE pass the input to \code{verify_filepairs}}
-
-\item{...}{other arguments passed to \code{verify_filepairs} except \code{min_size}}
+\item{...}{arguments for \code{\link[auntie]{size_filepairs}}}
 }
 \value{
-tibble of 
-\itemize{
-  \item forward, charcater vector of foreward filenames
-  \item reverse, charcater vector of reverse filenames
-  \item forward_size, numeric file sizes in bytes
-  \item reverse_size, numeric file sizes in bytes
-  \item size_pass logical, TRUE/FALSE if the size passes and NA when min_size is NA
-}
+see \code{\link[auntie]{size_filepairs}}
 }
 \description{
 Compute and test the size of filepairs

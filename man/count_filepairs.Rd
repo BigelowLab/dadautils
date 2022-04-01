@@ -10,7 +10,7 @@ count_filepairs(x)
 \item{x}{a list with file pairings as character vectors}
 }
 \value{
-named numeric vector with counts for each element
+see \code{\link[auntie]{count_filepairs}}
 }
 \description{
 Count the length of filepairs

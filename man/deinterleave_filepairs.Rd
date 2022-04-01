@@ -4,15 +4,15 @@
 \alias{deinterleave_filepairs}
 \title{Given a even numbered vector of filenames, deinterleaf into a filepairs list}
 \usage{
-deinterleave_filepairs(x, elements = c("forward", "reverse"))
+deinterleave_filepairs(x, ...)
 }
 \arguments{
 \item{x}{a vector of items}
 
-\item{elements}{character,the names of the elements}
+\item{...}{arguments for \code{\link[auntie]{deinterleave_filepairs}}}
 }
 \value{
-return a filepairs list
+see \code{\link[auntie]{deinterleave_filepairs}}
 }
 \description{
 Given a even numbered vector of filenames, deinterleaf into a filepairs list

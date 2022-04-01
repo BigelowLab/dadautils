@@ -4,28 +4,15 @@
 \alias{verify_filepairs}
 \title{Verify that a list of file pairs is suitable for processing.}
 \usage{
-verify_filepairs(
-  x,
-  min_size = NULL,
-  elements = c("forward", "reverse"),
-  require_reverse = FALSE,
-  action = c("stop", "warn")[2]
-)
+verify_filepairs(x, ...)
 }
 \arguments{
 \item{x}{a list with file pairings as character vectors}
 
-\item{min_size}{numeric, files with fewer bytes than this number are considered empty. Set to NA or NULL to ignore file size.}
-
-\item{elements}{character, the names of the file pair elements to test}
-
-\item{require_reverse}{logical, if TRUE then insist that reverse files must be present (ala Illumina). If FALSE (the default) then allow reverse files to be absent (ala PacBio)}
-
-\item{action}{character, either stop or warn upon discovery of mismatched files or all file sizes
-fall below the minimum size (if tested)}
+\item{...}{arguments for \code{\link[auntie]{verify_filepairs}}}
 }
 \value{
-the input list with possibly all elements removed if all files fail the size test
+see \code{\link[auntie]{verify_filepairs}}
 }
 \description{
 Verify that a list of file pairs is suitable for processing.

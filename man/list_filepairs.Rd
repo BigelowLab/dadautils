@@ -4,38 +4,15 @@
 \alias{list_filepairs}
 \title{List files and separate into forward and reverse file lists based upon filenaming patterns.}
 \usage{
-list_filepairs(
-  path,
-  pattern_forward = "^.*R1_001",
-  pattern_reverse = "^.*R2_001",
-  patterns_exclude = "^.*\\\\.cutadapt_output\\\\.txt$",
-  glob = FALSE,
-  verify = TRUE,
-  ...
-)
+list_filepairs(path, ...)
 }
 \arguments{
 \item{path}{character, the input path}
 
-\item{pattern_forward}{file pattern, the default is to match "^.*R1_001"}
-
-\item{pattern_reverse}{file pattern, the default is to match either "^.*R2_001"}
-
-\item{patterns_exclude}{one or more file patterns to exclude, default is "^.*\\.cutadapt_output\\.txt$"
-Unlike \code{pattern_forward} and \code{pattern_reverse} this can have multiple elements.  Set to 
-NULL of NA to skip.}
-
-\item{glob}{logical, if \code{TRUE} the input patterns are considered file globs like "*_R1_001.fastq"
-and will be converted to regex patterns using \code{\link[utils]{glob2rx}}.
-If glob is \code{FALSE} then the the patterns are passed to \code{\link[base]{list.files}}
-as provided by the user.}
-
-\item{verify}{logical, if TRUE test that the filepairs are the same length}
-
-\item{...}{further arguments for \code{\link[base]{list.files}}}
+\item{...}{arguments for \code{\link[auntie]{list_filepairs}}}
 }
 \value{
-named list of sorted forward and reverse filenames (reverse possibly zero-length character)
+see \code{\link[auntie]{list_filepairs}}
 }
 \description{
 If reverse files are not present (ala \code{PacBio}) then that element is set to a zero-length
