@@ -42,7 +42,11 @@ see \code{\link[dada2]{assignTaxonomy}}}
 \item{...}{further arguments for \code{\link[dada2]{assignTaxonomy}}}
 }
 \value{
-character matrix
+a named list with two elements 
+\itemize{
+  \item{tax, character matrix}
+  \item{boot, character matrix or NULL if outputBootstraps is FALSE}
+}
 }
 \description{
 We compare the number of available levels in the reference database with the number of 

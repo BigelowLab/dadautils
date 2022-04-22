@@ -53,9 +53,13 @@ verify_taxalevels <- function(taxLevels, refFasta, delim = ";"){
 #'        is ignored - see \code{\link[dada2]{assignTaxonomy}}
 #' @param save_file logical, if TRUE save the file as CSV. If TRUE then \code{minBoot} is ignored,
 #'     see \code{\link[dada2]{assignTaxonomy}}
-#' @param filename character, the file to write to if save_file is TRUE
+#' @param filename character, the file to write to if save_file is TRUE 
 #' @param ... further arguments for \code{\link[dada2]{assignTaxonomy}}
-#' @return character matrix
+#' @return a named list with two elements 
+#' \itemize{
+#'   \item{tax, character matrix}
+#'   \item{boot, character matrix or NULL if outputBootstraps is FALSE}
+#' }
 assign_taxonomy <- function(seqs, 
   refFasta = NULL,
   taxLevels = c("Kingdom", "Phylum", "Class", "Order", "Family", "Genus", "Species"),
@@ -65,7 +69,8 @@ assign_taxonomy <- function(seqs,
   save_file = FALSE,
   filename = "taxa.csv",
   ...){
-  
+
+    
     if (is.null(refFasta)) stop("refFasta is required")
       
     # here we chack that the levels are the same - we warn but do not throw an error
@@ -74,32 +79,50 @@ assign_taxonomy <- function(seqs,
     x <- dada2::assignTaxonomy(seqs, refFasta, taxLevels = taxLevels, ...)  
     cat("\n") # because assign taxonomy is verbose without adding a new line
     
+    if (!inherits(x, "list")){
+      x <- list(tax = x, boot = NULL)
+    }
+    
     if (populate_truncated){
-      if (length(x) == 2 && "tax" %in% names(x)){
-        x <- x$tax
-      }
-      ix <- taxLevels %in% colnames(x)
+      ix <- taxLevels %in% colnames(x$tax)
       if (!all(ix)) {
         ix <- taxLevels[!ix]
         y <- matrix(truncated_value, 
           ncol = length(ix), 
-          nrow = nrow(x),
-          dimnames = list(rownames(x), ix))
-        x <- cbind(x,y)
+          nrow = nrow(x$tax),
+          dimnames = list(rownames(x$tax), ix))
+        x$tax <- cbind(x$tax,y)
+      }
+      
+      if (!is.null(x$boot)){
+        ix <- taxLevels %in% colnames(x$boot)
+        if (!all(ix)) {
+          ix <- taxLevels[!ix]
+          y <- matrix(truncated_value, 
+            ncol = length(ix), 
+            nrow = nrow(x$boot),
+            dimnames = list(rownames(x$boot), ix))
+          x$boot <- cbind(x$boot,y)
+        }
       }
     }  
     if (!is.na(drop_levels[1])){
-      if (length(x) == 2 && "tax" %in% names(x)){
-        x <- x$tax
+      ix <- colnames(x$tax) %in% drop_levels
+      x$tax <- x$tax[, !ix, drop = FALSE]
+      if (!is.null(x$boot)){
+        ix <- colnames(x$boot) %in% drop_levels
+        x$boot <- x$boot[, !ix, drop = FALSE]
       }
-      ix <- colnames(x) %in% drop_levels
-      x <- x[, !ix, drop = FALSE]
     }
     if (save_file){
-      if (is.list(x) && "tax" %in% names(x)){
-        readr::write_csv(x$tax %>% dplyr::as_tibble(), filename)
+      if (!is.null(x$boot)){
+        tax <- x$tax ; colnames(tax) <- paste("tax", colnames(tax), sep = ".")
+        boot <- x$boot; colnames(boot) <- paste("boot", colnames(boot), sep = ".")
+        y <- dplyr::as_tibble(tax, rownames = "seq") %>%
+         dplyr::left_join(dplyr::as_tibble(boot, rownames = "seq"), by = "seq") %>%
+         readr::write_csv(filename)
       } else {
-        readr::write_csv(x %>% dplyr::as_tibble(), filename)
+        readr::write_csv(x$tax %>% dplyr::as_tibble(), filename)
       }
     }
     x
