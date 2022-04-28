@@ -45,7 +45,7 @@ see \code{\link[dada2]{assignTaxonomy}}}
 a named list with two elements 
 \itemize{
   \item{tax, character matrix}
-  \item{boot, character matrix or NULL if outputBootstraps is FALSE}
+  \item{boot, integer matrix, possibly filled with NA_integer_ if outputBootstaps is FALSE}
 }
 }
 \description{

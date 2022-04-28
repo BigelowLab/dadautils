@@ -58,7 +58,7 @@ verify_taxalevels <- function(taxLevels, refFasta, delim = ";"){
 #' @return a named list with two elements 
 #' \itemize{
 #'   \item{tax, character matrix}
-#'   \item{boot, character matrix or NULL if outputBootstraps is FALSE}
+#'   \item{boot, integer matrix, possibly filled with NA_integer_ if outputBootstaps is FALSE}
 #' }
 assign_taxonomy <- function(seqs, 
   refFasta = NULL,
@@ -80,7 +80,13 @@ assign_taxonomy <- function(seqs,
     cat("\n") # because assign taxonomy is verbose without adding a new line
     
     if (!inherits(x, "list")){
-      x <- list(tax = x, boot = NULL)
+      # if the user sets outputBootstraps = FALSE then we simply
+      # cast a copy of x (a matrix at this point) to integer
+      # this forces each element to NA_integer_, but nicely preserves the
+      # matrix dimenions and row/col names
+      boot <- x
+      suppressWarnings(mode(boot) <- "integer")
+      x <- list(tax = x, boot = boot)
     }
     
     if (populate_truncated){
