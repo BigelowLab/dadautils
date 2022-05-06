@@ -134,7 +134,28 @@ assign_taxonomy <- function(seqs,
     x
   }
 
-
+#' Combine fasta sequence, taxonomy and bootstrap values
+#'
+#' @export
+#' @param fasta FASTA sequence data
+#' @param taxa list, as produced by \code{\link{assign_taxonomy}}
+#' @param filename character, filename to write the table to, or NA to skip writing
+#' @return tibble of ASV taxonomy
+merge_taxonomy <- function(fasta, taxa,
+  filename = c(NA, "ASV_taxa.csv")[1]){
+    
+  tax <- taxa$tax
+  colnames(tax) <- paste("tax", colnames(tax), sep = ".")
+  boot <- taxa$boot
+  colnames(boot) <- paste("boot", colnames(boot), sep = ".")
+  
+  y <- dplyr::as_tibble(tax, rownames = "seq") %>%
+   dplyr::bind_cols(dplyr::as_tibble(boot)) %>%
+   dplyr::mutate(ASV = names(ASV), .before = 1)
+  if (!is.na(filename[1])) y <- readr::write_csv(y, filename)
+    
+  y
+}
 
 #' Filter by removal of one or more instances of values found in one or more variables.
 #'
