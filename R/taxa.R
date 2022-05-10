@@ -151,7 +151,7 @@ merge_taxonomy <- function(fasta, taxa,
   
   y <- dplyr::as_tibble(tax, rownames = "seq") %>%
    dplyr::bind_cols(dplyr::as_tibble(boot)) %>%
-   dplyr::mutate(ASV = names(ASV), .before = 1)
+   dplyr::mutate(ASV = names(fasta), .before = 1)
   if (!is.na(filename[1])) y <- readr::write_csv(y, filename)
     
   y
