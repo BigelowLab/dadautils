@@ -15,7 +15,7 @@
 fastq_stats <- function(filename = unname(unlist(example_filepairs())) , n = 500000){
   
   if (length(filename) > 1) {
-    r <- parallel::mclapply(filename, fastq_stats, n = n) %>%
+    r <- parallel::mclapply(filename, fastq_stats, n = n) |>
       dplyr::bind_rows()
     return(r)
   }
@@ -27,16 +27,16 @@ fastq_stats <- function(filename = unname(unlist(example_filepairs())) , n = 500
     return(NULL)
   }
   
-  w <- x %>%
+  w <- x |>
       ShortRead::width()
       
-  srqa <- ShortRead::qa(list(x) %>% setNames(basename(filename[1])), n = n)
+  srqa <- ShortRead::qa(list(x) |> setNames(basename(filename[1])), n = n)
     
   dplyr::tibble(filename = filename[1], 
        nread = length(x),
        ncycles = list(w),
        quantile_cycles = list(quantile(w, probs = seq(from = 0.01, to = 0.99, by = 0.01))),
-       per_cycle_quality = list(srqa[["perCycle"]]$quality %>% dplyr::as_tibble()))
+       per_cycle_quality = list(srqa[["perCycle"]]$quality |> dplyr::as_tibble()))
 }
 
 
@@ -63,6 +63,7 @@ reads_overlap <- function(f = 250, r = 189, a = 400){f - (a-r)}
 #'         used if form is "reduced".}
 #' }
 #' @param form character either "full" or "reduced".  If reduce return just the threshold row.
+#' @param verbose logical, if TRUE then output messages for debugging purposes
 #' @return the input list with an added cutoff tibble of 
 #' \itemize{
 #'  \item{Cycle the predicted Cycle value - the computed cutoff}
@@ -75,21 +76,25 @@ reads_overlap <- function(f = 250, r = 189, a = 400){f - (a-r)}
 #' \dontrun{
 #'   files <- c(system.file("extdata", "sam1F.fastq.gz", package="dada2"),
 #'              system.file("extdata", "sam1R.fastq.gz", package="dada2"))
-#'   result <- quality_profile_data(files) %>%
+#'   result <- quality_profile_data(files) |>
 #'    quality_profile_cutoff()
 #'  }
 quality_profile_cutoff <- function(x = quality_profile_data(),
   method = "ruler",
   params = list(score = 30, model = "Mean ~ poly(Cycle, 2)", quantile_min = 0.9),
-  form = c("full", "reduced")[2]){
+  form = c("full", "reduced")[2],
+  verbose = FALSE){
   
+    # used for devel
     if (FALSE){
+      x = quality_profile_data()
       method = "ruler"
       params = list(score = 30, model = "Mean ~ poly(Cycle, 2)", quantile_min = 0.9)
       form = c("full", "reduced")[2]
     }
   
     r <- NULL
+    
     if (tolower(method[1]) == "ruler"){
       
       # function to compute model and do cutoffs using Pete/Robin horizontal ruler
@@ -105,35 +110,45 @@ quality_profile_cutoff <- function(x = quality_profile_data(),
                             model = stats::as.formula("Mean ~ poly(Cycle, 2)"),
                             form = "reduced",
                             qstat = NULL){
-                            #qstat = fastq_stats(x1$file)){
                               
                               
         if (FALSE){
+          # for devel
           threshold = 30 
           quantile_min = 0.9 
           model = stats::as.formula("Mean ~ poly(Cycle, 2)")
           form = "reduced"
-          #qstat = fastq_stats(x1$file)
         }
+        
+        if (verbose) {
+          message("fit_ruler: implementing ruler method")
+          message(sprintf(" filename: %s", basename(x1$file[1])))
+        }
+        
+        
         if (!inherits(model, "formula")) model <- as.formula(model)
           
-        qstat <- qstat %>%
-          dplyr::filter(.data$filename == x1$file[1])
+        if (!is.null(qstat)) qstat <- qstat |>
+                              dplyr::filter(.data$filename == x1$file[1])
             
         f <- lm(model, data = x1)
-        p <- predict(f) %>% 
-          dplyr::as_tibble(rownames = "Cycle") %>%
-          dplyr::mutate(Cycle = as.numeric(.data$Cycle)) %>%
+        p <- predict(f) |> 
+          dplyr::as_tibble(rownames = "Cycle") |>
+          dplyr::mutate(Cycle = as.numeric(.data$Cycle)) |>
           dplyr::rename(Score = .data$value) 
            
-        p <- p %>%  
+        p <- p |>  
           dplyr::mutate(model = list(f), 
                         file = x1$file,
                         status = "a")
          
         ix <- which(findInterval(p$Score, threshold[1]) > 0)
-        ix <- ix[length(ix)]
-                       
+        if (length(ix) > 0){
+          ix <- ix[length(ix)]
+        } else {
+          p$status <- "a_fail"
+          ix <- nrow(p)
+        }             
         if (tolower(form[1]) == "reduced"){
           if (!charlier::is.nullna(quantile_min[1])){
             # compute the quantile
@@ -141,26 +156,38 @@ quality_profile_cutoff <- function(x = quality_profile_data(),
             # compare to ruler method
             # select more permissive trunLen of the two
 
-            #q_min <- ShortRead::readFastq(x1$file) %>%
-            #  ShortRead::width() %>%
-            #  stats::quantile(probs = quantile_min[1], names = FALSE)
             q_min <- qstat$quantile_cycles[[1]][sprintf("%i%%", quantile_min*100)]
             iy <- which(p$Cycle <= q_min)
             if (length(iy) > 0){
               iy <- iy[length(iy)]
             } else {
+              message("  fit_ruler: all of the Cycles are below q_min")
+              
               # ????? what happens here?
             }
-            if (iy < ix){
-              ix <- iy      # replace the truncLen - update status
-              p <- p %>%
+            
+            if (length(iy) <= 0){
+              
+              p <- p |>
+                dplyr::mutate(status = sprintf("p_%0.2f_fail", quantile_min[1]))
+              
+            } else if (iy < ix){
+              
+              ix <- iy      # replace the cutoff - update status
+              p <- p |>
                 dplyr::mutate(status = sprintf("p_%0.2f", quantile_min[1]))
+                
             }
           } 
-          
-          p <- p %>%
+          # at this point ix is either autoselected or user thresholded
+          # and status is one of "a", "p_n.nn" or "p_n.nn_fail"
+          p <- p |>
             dplyr::slice(ix)
         }
+        if(verbose){
+          message(sprintf("  nrows returned: %i", nrow(p)))
+        }
+        
         p
       } # fit ruler
       
@@ -177,17 +204,17 @@ quality_profile_cutoff <- function(x = quality_profile_data(),
       full_file_names <- x$files
       names(full_file_names) <- basename(full_file_names)
       
-      r <- x$statdf %>%
-        dplyr::mutate(file = full_file_names[.data$file]) %>% # we may need the full filepath in the computation
-        dplyr::group_by(.data$file) %>%
+      r <- x$statdf |>
+        dplyr::mutate(file = full_file_names[.data$file]) |> 
+        dplyr::group_by(.data$file) |>
         dplyr::group_map(fit_ruler, 
                          .keep = TRUE, 
                          threshold = params$score,
                          model = params$model,
                          quantile = params$quantile_min,
                          form = form,
-                         qstat = x$quality_stats) %>%
-        dplyr::bind_rows() %>%
+                         qstat = x$quality_stats) |>
+        dplyr::bind_rows() |>
         dplyr::mutate(file = basename(.data$file))
     } else {
       stop("method not known:", method[1])
@@ -266,7 +293,7 @@ quality_profile_data <- function(
     ix <- sapply(qs, function(qs) which(y >= qs)[1])
     #cum <- sum(x$Count)
     meen <- sum(x$Score * x$Count)/sumx
-    as.list(c(key$Cycle, x$Score[ix], sumx, meen)) %>%
+    as.list(c(key$Cycle, x$Score[ix], sumx, meen)) |>
       setNames(c("Cycle", sprintf("Q%i", qs*100), "Cum", "Mean"))
   }
   
@@ -276,14 +303,14 @@ quality_profile_data <- function(
   xx <- lapply(fl,
     function(f){
       
-      s <- stats %>%
+      s <- stats |>
         dplyr::filter(.data$filename == f)
-      df <- (s %>%
+      df <- (s |>
         dplyr::pull(.data$per_cycle_quality))[[1]]
       rc <- s$nread 
       
       #srqa <- ShortRead::qa(f, n = n)
-      #df <- srqa[["perCycle"]]$quality %>%
+      #df <- srqa[["perCycle"]]$quality |>
       #  dplyr::as_tibble()
       #rc <- sum(srqa[["readCounts"]]$read) # Handle aggregate form from qa of a directory
       
@@ -295,14 +322,14 @@ quality_profile_data <- function(
       
       # Calculate summary statistics at each Cycle
       if (FALSE){
-        statdf <- df %>%
-          dplyr::group_by(.data$Cycle) %>%
-          dplyr::group_map(get_quants, .keep = TRUE) %>%
-          dplyr::bind_rows() %>%
+        statdf <- df |>
+          dplyr::group_by(.data$Cycle) |>
+          dplyr::group_map(get_quants, .keep = TRUE) |>
+          dplyr::bind_rows() |>
           dplyr::mutate(file = basename(f))
         if (!all(unique(df$Cycle)) %in% qs$Cycle)
           stop("One or more Cycles failed to generate quantiles, means and cums")
-        #plotdf <- df %>%
+        #plotdf <- df |>
         #  dplyr::mutate(file = basename(f))
       } else {
         means <- rowsum(df$Score*df$Count, df$Cycle)/rowsum(df$Count, df$Cycle)  
@@ -329,7 +356,7 @@ quality_profile_data <- function(
             file   = basename(f)) 
       } # development block
       
-      plotdf <- df %>%
+      plotdf <- df |>
         dplyr::mutate(file = basename(f))
       
       # annotations
@@ -343,16 +370,16 @@ quality_profile_data <- function(
       list(plotdf = plotdf, statdf = statdf, anndf = anndf)
     }) # lapply through fl 
 
-    plotdf <- lapply(xx, "[[", "plotdf") %>%
+    plotdf <- lapply(xx, "[[", "plotdf") |>
       dplyr::bind_rows()
-    statdf <- lapply(xx, "[[", "statdf") %>%
+    statdf <- lapply(xx, "[[", "statdf") |>
       dplyr::bind_rows()
-    anndf <- lapply(xx, "[[", "anndf") %>%
-      dplyr::bind_rows() %>%
+    anndf <- lapply(xx, "[[", "anndf") |>
+      dplyr::bind_rows() |>
       dplyr::mutate(minScore = min(.data$minScore))
       
     if (aggregate && length(fl) > 1){
-    	plotdf.summary <- aggregate(Count ~ Cycle + Score, data = plotdf, sum) %>%
+    	plotdf.summary <- aggregate(Count ~ Cycle + Score, data = plotdf, sum) |>
          dplyr::as_tibble()
     	plotdf.summary$label <- paste(nrow(anndf), "files (aggregated)")
     	means <- rowsum(plotdf.summary$Score*plotdf.summary$Count, plotdf.summary$Cycle)/
@@ -420,7 +447,7 @@ quality_profile_drawing <- function(x = quality_profile_data()){
   		    label=sprintf("Total reads: %d", sum(x$anndf$rc)), color="red", hjust=0) +
   		  ggplot2::theme_bw() +
   		  ggplot2::theme(panel.grid=ggplot2::element_blank()) +
-  		  ggplot2::guides(fill=FALSE) +
+  		  ggplot2::guides(fill="none") +
         ggplot2::facet_wrap(~label)
       if(length(unique(x$statdf$Cum))>1) {
         p <- p +
@@ -449,7 +476,7 @@ quality_profile_drawing <- function(x = quality_profile_data()){
         ggplot2::xlab("Cycle") +
   		  ggplot2::theme_bw() +
   		  ggplot2::theme(panel.grid=ggplot2::element_blank()) +
-  		  ggplot2::guides(fill=FALSE) +
+  		  ggplot2::guides(fill="none") +
   		  ggplot2::geom_text(data=x$anndf, ggplot2::aes(x=0, label=.data$rclabel, y=0),
   		    color="red", hjust=0) +
         ggplot2::facet_wrap(~file)
@@ -500,17 +527,17 @@ quality_profile_pairs_drawing <- function(X){
      # build a temporary list that binds the f/r pairs together
      x <- list(files = c(ffile , rfile ),
                opts = X$forward$opts,  #presumably forward and reverse are the same
-               statdf = X$forward$statdf %>% 
-                         dplyr::filter(.data$file == ffile) %>%
-                         dplyr::bind_rows(X$reverse$statdf %>% 
+               statdf = X$forward$statdf |> 
+                         dplyr::filter(.data$file == ffile) |>
+                         dplyr::bind_rows(X$reverse$statdf |> 
                            dplyr::filter(.data$file == rfile)),
-               anndf = X$forward$anndf %>% 
-                         dplyr::filter(.data$file == ffile) %>%
-                         dplyr::bind_rows(X$reverse$anndf %>% 
+               anndf = X$forward$anndf |> 
+                         dplyr::filter(.data$file == ffile) |>
+                         dplyr::bind_rows(X$reverse$anndf |> 
                            dplyr::filter(.data == rfile)),
-               plotdf = X$forward$plotdf %>% 
-                         dplyr::filter(.data$file == ffile) %>%
-                         dplyr::bind_rows(X$reverse$plotdf %>% 
+               plotdf = X$forward$plotdf |> 
+                         dplyr::filter(.data$file == ffile) |>
+                         dplyr::bind_rows(X$reverse$plotdf |> 
                            dplyr::filter(.data$file == rfile)))
      
      quality_profile_drawing(x)  
@@ -564,7 +591,7 @@ quality_profile <- function(
     aggregate <- FALSE
   }
  
-  x <- quality_profile_data(x, n = n, aggregate = aggregate) %>%
+  x <- quality_profile_data(x, n = n, aggregate = aggregate) |>
     quality_profile_cutoff(...) 
   x$plot <- quality_profile_drawing(x)
   invisible(x)
@@ -617,7 +644,8 @@ quality_profile_pairs <- function(
     xx <- lapply(filelist,
       function(filenames, n = n, aggregate = aggregate, ... ){
         if (length(filenames) > 0){
-          x <- quality_profile_data(filenames, n = n, aggregate = aggregate ) %>%
+          #x <- quality_profile_data(filenames, n = n, aggregate = aggregate )
+          x <- quality_profile_data(filenames, n = n, aggregate = aggregate ) |>
             quality_profile_cutoff(...)
         } else {
           x <- NULL
@@ -639,8 +667,8 @@ quality_profile_pairs <- function(
       function(n){
         x <- xx[[n]]$cutoff
         setNames(x, paste0(substring(n, 1, 1), names(x)))
-        }) %>%
-        dplyr::bind_cols() %>%
+        }) |>
+        dplyr::bind_cols() |>
         dplyr::mutate(overlap = reads_overlap(f = .data$fCycle, r = .data$rCycle, a = amplicon_length))
      
     ix <- xx[['overlap']]$overlap < min_overlap[1]
@@ -650,9 +678,9 @@ quality_profile_pairs <- function(
         
     # write a modified overlap file if provided a filename
     if (!charlier::is.nullna(overlap_filename[1])){
-      dummy <- xx$overlap %>%
-        dplyr::select(-.data$fmodel, -.data$rmodel) %>%
-        dplyr::mutate(amplicon_length = amplicon_length) %>%
+      dummy <- xx$overlap |>
+        dplyr::select(-.data$fmodel, -.data$rmodel) |>
+        dplyr::mutate(amplicon_length = amplicon_length) |>
         readr::write_csv(overlap_filename[1])
     }  
 

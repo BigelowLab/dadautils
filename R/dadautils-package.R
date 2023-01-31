@@ -10,6 +10,7 @@
 #' @importFrom grDevices dev.off pdf
 #' @importFrom utils installed.packages write.csv
 #' @importFrom stats setNames lm predict as.formula quantile
+#' @importFrom patchwork plot_layout
 NULL
 
 #' Deprecated functions in dadautils

@@ -6,7 +6,7 @@
 \usage{
 learn_errors(
   filelist,
-  multithread = count_cores(),
+  multithread = charlier::count_cores(),
   output_path = dirname(filelist$forward[1]),
   save_output = FALSE,
   save_graphics = FALSE,

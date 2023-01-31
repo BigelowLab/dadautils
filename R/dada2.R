@@ -173,7 +173,7 @@ filter_and_trim <- function(filelist,
 #' @return list with elements for forward and reverse as returned by \code{\link[dada2]{learnErrors}}. 
 #'    The reverse element may be NULL.
 learn_errors <- function(filelist,
-  multithread = count_cores(),
+  multithread = charlier::count_cores(),
   output_path = dirname(filelist$forward[1]),
   save_output = FALSE,
   save_graphics = FALSE,

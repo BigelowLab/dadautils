@@ -8,7 +8,8 @@ quality_profile_cutoff(
   x = quality_profile_data(),
   method = "ruler",
   params = list(score = 30, model = "Mean ~ poly(Cycle, 2)", quantile_min = 0.9),
-  form = c("full", "reduced")[2]
+  form = c("full", "reduced")[2],
+  verbose = FALSE
 )
 }
 \arguments{
@@ -25,6 +26,8 @@ quality_profile_cutoff(
 }}
 
 \item{form}{character either "full" or "reduced".  If reduce return just the threshold row.}
+
+\item{verbose}{logical, if TRUE then output messages for debugging purposes}
 }
 \value{
 the input list with an added cutoff tibble of 
@@ -43,7 +46,7 @@ Compute cutoff levels \code{trunLen} for \code{\link[dada2]{filterAndTrim}}
 \dontrun{
   files <- c(system.file("extdata", "sam1F.fastq.gz", package="dada2"),
              system.file("extdata", "sam1R.fastq.gz", package="dada2"))
-  result <- quality_profile_data(files) \%>\%
+  result <- quality_profile_data(files) |>
    quality_profile_cutoff()
  }
 }
