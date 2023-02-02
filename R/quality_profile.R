@@ -104,12 +104,16 @@ quality_profile_cutoff <- function(x = quality_profile_data(),
       # model - model as formula or character to be cast as formula
       # form character (if 'reduced' then retrive just the place where the cutoff occurs)
       # qstat as per \code{fastq_stats}
+      # min_fraction_above_threshold numeric, minimum fraction of quality scores above the threshold
+      # cutoff_adjustment numeric, adjust the cutoff by this amount after it is computed
       fit_ruler <- function(x1, key, 
                             threshold = 30, 
                             quantile_min = 0.9, 
                             model = stats::as.formula("Mean ~ poly(Cycle, 2)"),
                             form = "reduced",
-                            qstat = NULL){
+                            qstat = NULL,
+                            min_fraction_above_threshold = 0.7,
+                            cutoff_adjustment = 0){
                               
                               
         if (FALSE){
@@ -142,13 +146,24 @@ quality_profile_cutoff <- function(x = quality_profile_data(),
                         file = x1$file,
                         status = "a")
          
-        ix <- which(findInterval(p$Score, threshold[1]) > 0)
-        if (length(ix) > 0){
-          ix <- ix[length(ix)]
-        } else {
+        #ix <- which(findInterval(p$Score, threshold[1]) > 0)
+        # if (length(ix) > 0){
+        #   ix <- ix[length(ix)]
+        # } else {
+        #   p$status <- "a_fail"
+        #   ix <- nrow(p)
+        # }   
+        
+        iz <- findInterval(p$Score, threshold[1]) > 0
+        
+        if ( (sum(iz)/length(iz)) < min_fraction_above_threshold){
+          ix <- 1
           p$status <- "a_fail"
-          ix <- nrow(p)
-        }             
+        } else {
+          ix <- which(iz)
+          ix <- ix[length(ix)]
+        }
+                  
         if (tolower(form[1]) == "reduced"){
           if (!charlier::is.nullna(quantile_min[1])){
             # compute the quantile
@@ -162,11 +177,10 @@ quality_profile_cutoff <- function(x = quality_profile_data(),
               iy <- iy[length(iy)]
             } else {
               message("  fit_ruler: all of the Cycles are below q_min")
-              
-              # ????? what happens here?
+              iy <- Inf
             }
             
-            if (length(iy) <= 0){
+            if (is.infinite(iy)){
               
               p <- p |>
                 dplyr::mutate(status = sprintf("p_%0.2f_fail", quantile_min[1]))
