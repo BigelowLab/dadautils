@@ -155,6 +155,7 @@ quality_profile_cutoff <- function(x = quality_profile_data(),
         if ( (sum(iz)/length(iz)) < min_fraction_above_threshold){
           ix <- 1
           p$status <- "a_fail"
+          message(" too few below min_fraction_above_threshold - cutoff assigned 1")
         } else {
           ix <- which(iz)
           ix <- ix[length(ix)]
