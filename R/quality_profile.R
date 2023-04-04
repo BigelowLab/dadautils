@@ -654,11 +654,9 @@ quality_profile_pairs <- function(
 
 
 
-    #xx <- lapply(filelist, quality_profile, n = n, aggregate = aggregate, ...)
     xx <- lapply(filelist,
       function(filenames, n = n, aggregate = aggregate, ... ){
         if (length(filenames) > 0){
-          #x <- quality_profile_data(filenames, n = n, aggregate = aggregate )
           x <- quality_profile_data(filenames, n = n, aggregate = aggregate ) |>
             quality_profile_cutoff(...)
         } else {
@@ -694,7 +692,7 @@ quality_profile_pairs <- function(
     if (!charlier::is.nullna(overlap_filename[1])){
       dummy <- xx$overlap |>
         dplyr::select(-.data$fmodel, -.data$rmodel) |>
-        dplyr::mutate(amplicon_length = amplicon_length) |>
+        # dplyr::mutate(amplicon_length = amplicon_length) |>
         readr::write_csv(overlap_filename[1])
     }  
 
