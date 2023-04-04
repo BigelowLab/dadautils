@@ -127,6 +127,10 @@ quality_profile_cutoff <- function(x = quality_profile_data(),
         if (verbose) {
           message("fit_ruler: implementing ruler method")
           message(sprintf(" filename: %s", basename(x1$file[1])))
+          message(sprintf(" threshold: %0.1f", threshold))
+          message(sprintf(" quantile_min: %0.2f", quantile_min))
+          message(sprintf(" min_fraction_above_threshold: %0.2f", min_fraction_above_threshold))
+          #message(sprintf(" cutoff_adjustment: %0.2f", cutoff_adjustment))
         }
         
         
@@ -145,14 +149,6 @@ quality_profile_cutoff <- function(x = quality_profile_data(),
           dplyr::mutate(model = list(f), 
                         file = x1$file,
                         status = "a")
-         
-        #ix <- which(findInterval(p$Score, threshold[1]) > 0)
-        # if (length(ix) > 0){
-        #   ix <- ix[length(ix)]
-        # } else {
-        #   p$status <- "a_fail"
-        #   ix <- nrow(p)
-        # }   
         
         iz <- findInterval(p$Score, threshold[1]) > 0
         
@@ -197,9 +193,12 @@ quality_profile_cutoff <- function(x = quality_profile_data(),
           # and status is one of "a", "p_n.nn" or "p_n.nn_fail"
           p <- p |>
             dplyr::slice(ix)
+          if (verbose) message(sprintf(" status: %s", p$status[1]))
         }
         if(verbose){
           message(sprintf("  nrows returned: %i", nrow(p)))
+          message(sprintf("  Cycle returned: %i", p$Cycle[1]))
+          message(sprintf("  Score returned: %i", p$Score[1]))
         }
         
         p
