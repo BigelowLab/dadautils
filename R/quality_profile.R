@@ -197,8 +197,8 @@ quality_profile_cutoff <- function(x = quality_profile_data(),
         }
         if(verbose){
           message(sprintf("  nrows returned: %i", nrow(p)))
-          message(sprintf("  Cycle returned: %i", p$Cycle[1]))
-          message(sprintf("  Score returned: %i", p$Score[1]))
+          message(sprintf("  Cycle returned: %0.0f", p$Cycle[1]))
+          message(sprintf("  Score returned: %0.0f", p$Score[1]))
         }
         
         p
