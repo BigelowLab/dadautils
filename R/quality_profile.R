@@ -61,9 +61,10 @@ reads_overlap <- function(f = 250, r = 189, a = 400){f - (a-r)}
 #'   \item{model character, the model}
 #'   \item{quantile_min numeric, quantile minimum used as a back stop if ruler method fails, set to NA to skip.  Only
 #'         used if form is "reduced".}
+#'   \item{min_fraction_above_threshold numeric, [0-1] minimum fraction of scores above this threshold}
+#'   \item{verbose logical, output debugging message}
 #' }
 #' @param form character either "full" or "reduced".  If reduce return just the threshold row.
-#' @param verbose logical, if TRUE then output messages for debugging purposes
 #' @return the input list with an added cutoff tibble of 
 #' \itemize{
 #'  \item{Cycle the predicted Cycle value - the computed cutoff}
@@ -81,7 +82,7 @@ reads_overlap <- function(f = 250, r = 189, a = 400){f - (a-r)}
 #'  }
 quality_profile_cutoff <- function(x = quality_profile_data(),
   method = "ruler",
-  params = list(score = 30, model = "Mean ~ poly(Cycle, 2)", quantile_min = 0.9),
+  params = list(score = 30, model = "Mean ~ poly(Cycle, 2)", quantile_min = 0.9, min_fraction_above_threshold = 0.7, verbose = TRUE),
   form = c("full", "reduced")[2],
   verbose = FALSE){
   
@@ -106,7 +107,7 @@ quality_profile_cutoff <- function(x = quality_profile_data(),
       # qstat as per \code{fastq_stats}
       # min_fraction_above_threshold numeric, minimum fraction of quality scores above the threshold
       # cutoff_adjustment numeric, adjust the cutoff by this amount after it is computed
-      fit_ruler <- function(x1, key, 
+       fit_ruler <- function(x1, key, 
                             threshold = 30, 
                             quantile_min = 0.9, 
                             model = stats::as.formula("Mean ~ poly(Cycle, 2)"),
@@ -151,8 +152,9 @@ quality_profile_cutoff <- function(x = quality_profile_data(),
                         status = "a")
         
         iz <- findInterval(p$Score, threshold[1]) > 0
-        
-        if ( (sum(iz)/length(iz)) < min_fraction_above_threshold){
+        test_val <- sum(iz)/length(iz)
+        if (verbose) message(sprintf(" ratio above min_threshold: %0.2f", test_val))
+        if (test_val < min_fraction_above_threshold){
           ix <- 1
           p$status <- "a_fail"
           message(" too few below min_fraction_above_threshold - cutoff assigned 1")
@@ -226,6 +228,8 @@ quality_profile_cutoff <- function(x = quality_profile_data(),
                          threshold = params$score,
                          model = params$model,
                          quantile = params$quantile_min,
+                         min_fraction_above_threshold = params$min_fraction_above_threshold,
+                         verbose = params$verbose,
                          form = form,
                          qstat = x$quality_stats) |>
         dplyr::bind_rows() |>
