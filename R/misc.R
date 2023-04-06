@@ -123,7 +123,7 @@ count_cores <- function(){
 #' @param custom_fun, a function to do custom extraction, ignored unless \code{rule} is "custom"
 #' @return character vector of sample names - one per input
 extract_sample_names <- function(x,
-  rule = c("before first _","basename","custom")[1],
+  rule = c("before first _","before first .","basename","custom")[1],
   element = "forward",
   custom_fun = NULL){
 
@@ -135,6 +135,7 @@ extract_sample_names <- function(x,
   }
   sample_names = switch(rule[1],
       "before first _" = sapply(strsplit(basename(x), "_"), `[`, 1),
+      "before first ." = sapply(strsplit(basename(x), "."), `[`, 1),
       "basename" = basename(x),
       "custom" = custom_fun(x),
        stop("rule not known - check with progammer to add a rule")
