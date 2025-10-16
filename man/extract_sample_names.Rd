@@ -6,7 +6,7 @@
 \usage{
 extract_sample_names(
   x,
-  rule = c("before first _", "basename", "custom")[1],
+  rule = c("before first _", "before first .", "basename", "custom")[1],
   element = "forward",
   custom_fun = NULL
 )

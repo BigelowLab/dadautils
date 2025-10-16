@@ -114,7 +114,8 @@ quality_profile_cutoff <- function(x = quality_profile_data(),
                             form = "reduced",
                             qstat = NULL,
                             min_fraction_above_threshold = 0.7,
-                            cutoff_adjustment = 0){
+                            cutoff_adjustment = 0,
+                            verbose = FALSE){
                               
                               
         if (FALSE){
@@ -678,27 +679,29 @@ quality_profile_pairs <- function(
       grDevices::dev.off()
     }
     
-    
-    xx[['overlap']] <- lapply(c("forward", "reverse"), 
-      function(n){
-        x <- xx[[n]]$cutoff
-        setNames(x, paste0(substring(n, 1, 1), names(x)))
-        }) |>
-        dplyr::bind_cols() |>
-        dplyr::mutate(overlap = reads_overlap(f = .data$fCycle, r = .data$rCycle, a = amplicon_length))
-     
-    ix <- xx[['overlap']]$overlap < min_overlap[1]
-    if (any(ix)){
-      warning(sprintf("one or more overlaps fall below minimum of %i", min_overlap))
+    if (!auntie::is_singleended(filelist)){
+      xx[['overlap']] <- lapply(c("forward", "reverse"), 
+        function(n){
+          x <- xx[[n]]$cutoff
+          setNames(x, paste0(substring(n, 1, 1), names(x)))
+          }) |>
+          dplyr::bind_cols() |>
+          dplyr::mutate(overlap = reads_overlap(f = .data$fCycle, r = .data$rCycle, a = amplicon_length))
+       
+      ix <- xx[['overlap']]$overlap < min_overlap[1]
+      if (any(ix)){
+        warning(sprintf("one or more overlaps fall below minimum of %i", min_overlap))
+      }
+          
+      # write a modified overlap file if provided a filename
+      if (!charlier::is.nullna(overlap_filename[1])){
+        dummy <- xx$overlap |>
+          dplyr::select(-.data$fmodel, -.data$rmodel) |>
+          # dplyr::mutate(amplicon_length = amplicon_length) |>
+          readr::write_csv(overlap_filename[1])
+      }  
+    } else {
+      xx[['overlap']] <- NULL
     }
-        
-    # write a modified overlap file if provided a filename
-    if (!charlier::is.nullna(overlap_filename[1])){
-      dummy <- xx$overlap |>
-        dplyr::select(-.data$fmodel, -.data$rmodel) |>
-        # dplyr::mutate(amplicon_length = amplicon_length) |>
-        readr::write_csv(overlap_filename[1])
-    }  
-
     invisible(xx)
 }
