@@ -448,7 +448,7 @@ quality_profile_data <- function(
 #'   print(result)
 #'  }
 quality_profile_drawing <- function(x = quality_profile_data()){
-  
+  if (length(x) == 0) return(NULL)
   if (x$opts$aggregate) {
       p <- ggplot2::ggplot(data=x$plotdf.summary, ggplot2::aes(x=.data$Cycle, y=.data$Score)) +
         ggplot2::geom_tile(ggplot2::aes(fill=.data$Count)) +
@@ -531,7 +531,7 @@ quality_profile_pairs_drawing <- function(X){
   npairs <- length(X$forward$files)
   norev <- length(X$reverse$files) == 0
   if (!norev) if(length(X$reverse$files) != npairs) stop("'forward' and 'reverse' must be same number of files")
-  if (norev) return(quality_profile_drawing(X[[1]]) ) 
+  if (norev) return(list(quality_profile_drawing(X[[1]])))
     
     
     
