@@ -198,6 +198,7 @@ paired_ee_threshold <- function(x = paired_ee_per_read(),
   if (!is.null(sample_names)){
     xx <- sapply(xx,
       function(x, sample_names = "unknown"){
+        if (length(x) == 0) return(x)
         dplyr::mutate(x, sample = sample_names) %>%
         dplyr::relocate(sample, .before = 1)
       }, 
@@ -208,6 +209,7 @@ paired_ee_threshold <- function(x = paired_ee_per_read(),
   if (tolower(form[1]) == "table"){
     xx <- sapply(names(xx),
       function(name){
+        if (length(xx[[name]]) == 0) return(x)
         dplyr::mutate(xx[[name]], direction = name) %>%
         dplyr::relocate(.data$direction, .before = 1)
       }, simplify = FALSE) %>%
