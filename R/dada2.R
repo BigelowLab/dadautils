@@ -248,10 +248,13 @@ run_dada <- function(filelist, errs,
 #' @param dada_r  list of dada2::dada results
 #' @param save_output logical, if TRUE save the output as RDS
 #' @param ... arguments for \code{\link[dada2]{mergePairs}}
-#' @return as returned by \code{\link[dada2]{mergePairs}}
+#' @return as returned by \code{\link[dada2]{mergePairs}} or NULL if the filelist represents a single-ended run
 merge_pairs <- function(filelist, dada_r,
   save_output = FALSE,
   ...){
+  
+  if (auntie::is_singleended(filelist)) return(NULL)
+    
   ff <- lapply(filelist, dada2::derepFastq)
   x <- dada2::mergePairs(
     dada_r$forward,

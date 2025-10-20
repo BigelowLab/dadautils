@@ -16,7 +16,7 @@ merge_pairs(filelist, dada_r, save_output = FALSE, ...)
 \item{...}{arguments for \code{\link[dada2]{mergePairs}}}
 }
 \value{
-as returned by \code{\link[dada2]{mergePairs}}
+as returned by \code{\link[dada2]{mergePairs}} or NULL if the filelist represents a single-ended run
 }
 \description{
 Merge pairs ala dada2::mergePairs
