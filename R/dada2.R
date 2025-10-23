@@ -277,7 +277,12 @@ merge_pairs <- function(filelist, dada_r,
 #' @param ... further arguments for  \code{\link[dada2]{getUniques}}
 #' @return integer number of uniques
 count_uniques <- function(x, ...){
-  sum(dada2::getUniques(x, ...))
+  if(length(x) ==  0){
+    r = 0
+  } else {
+    r = sum(dada2::getUniques(x, ...))
+  }
+  r
 }
 
 
